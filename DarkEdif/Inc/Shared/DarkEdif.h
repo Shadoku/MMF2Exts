@@ -48,9 +48,14 @@ bool CreateNewConditionInfo();
 bool CreateNewExpressionInfo();
 
 #ifndef NOPROPS
+
+#if EditorBuild
+
 void InitialisePropertiesFromJSON(mv *, EDITDATA *);
 
 Prop * GetProperty(EDITDATA *, size_t);
+
+#endif // EditorBuild
 
 void PropChangeChkbox(EDITDATA * edPtr, unsigned int PropID, const bool newValue);
 void PropChange(mv * mV, EDITDATA * &edPtr, unsigned int PropID, const void * newData, size_t newSize);
@@ -80,12 +85,21 @@ namespace DarkEdif {
 	// v3: 1st Sept 2020, commit 3d4cc2470c6cf0c562608620cc31979b506986a4
 	// Made updater error messages visible to end users. The webserver will be smart
 	// about what errors to show.
-	// v4: 4th Sept 2020, commit (latest)
+	// v4: 4th Sept 2020, commit 918195897fcdc229d535d229972b3ac734c73fb5
 	// Added a new type of updater reply for a nice message to ext dev, instead of one
 	// that includes all updater log. Also switched update thread spawn and wait to
-	// directly invoking the updater function. Added GetEventNumber.
+	// directly invoking the updater function.
+	// v5: 9th Sept 2020, commit e86745c6cdc32af36e8bd6eeb011bb4b04788c43
+	// Added DarkEdif::GetEventNumber. Now sets XP targeting when XP compiler is used.
+	// Pre-build tool now allows multiline-declared ACE functions. Fixed combo box
+	// property's initial value.
+	// Fixed sub-expressions causing wrong expression return type (corrupting float
+	// expression responses).
+	// v6: 14th Sept 2020, commit (latest)
+	// Removed SDK::EdittimeProperties in runtime builds; it's only necessary to read
+	// the property value and type via JSON in runtime.
 
-	static const int SDKVersion = 4;
+	static const int SDKVersion = 6;
 #if EditorBuild
 
 	/// <summary> Gets DarkEdif.ini setting. Returns empty if file missing or key not in file.
@@ -120,7 +134,7 @@ namespace DarkEdif {
 		ExtUpdateType ReadUpdateStatus(std::string * logData);
 
 		/// <summary> Updates ::SDK->Icon to draw on it; optionally displays a message box. </summary>
-		void RunUpdateNotifs(mv * mV, EDITDATA * edPtr);;
+		void RunUpdateNotifs(mv * mV, EDITDATA * edPtr);
 	}
 
 #endif // EditorBuild
@@ -447,7 +461,7 @@ void LinkActionDebug(unsigned int ID, Ret(Struct::*Function)(Args...) const)
 		if (curLang.type != json_object || curLang["About"]["Name"].type != json_string)
 			continue;
 
-		if (curLang["Actions"].u.array.length < ID)
+		if (curLang["Actions"].u.array.length <= ID)
 		{
 			str << "Error in linking action ID " << ID << "; it has no Actions JSON item.";
 			break;
@@ -516,7 +530,7 @@ void LinkConditionDebug(unsigned int ID, Ret(Struct::*Function)(Args...) const)
 		if (curLang.type != json_object || curLang["About"]["Name"].type != json_string)
 			continue;
 
-		if (curLang["Conditions"].u.array.length < ID)
+		if (curLang["Conditions"].u.array.length <= ID)
 		{
 			str << curLangName << ": error in linking condition ID " << ID << "; it has no Conditions JSON item.";
 			break;
@@ -576,7 +590,7 @@ void LinkExpressionDebug(unsigned int ID, Ret(Struct::*Function)(Args...) const)
 		if (curLang.type != json_object || curLang["About"]["Name"].type != json_string)
 			continue;
 
-		if (curLang["Expressions"].u.array.length < ID)
+		if (curLang["Expressions"].u.array.length <= ID)
 		{
 			str << curLangName << ": error in linking expression ID " << ID << "; it has no Expressions JSON item.";
 			break;
@@ -625,8 +639,6 @@ void LinkExpressionDebug(unsigned int ID, Ret(Struct::*Function)(Args...) const)
 		}
 
 		const int cppParamCount = sizeof...(Args);
-
-
 		int jsonParamCount = json["Parameters"].type == json_none ? 0 : json["Parameters"].u.array.length;
 
 		// If this JSON variable is set, this func doesn't read all the ACE parameters, which allows advanced users to call

@@ -300,11 +300,9 @@ Edif::SDK::SDK(mv * mV, json_value &_json) : json (_json)
 			}
 		}
 
-#if USE_DARKEDIF_UPDATE_CHECKER
-		DarkEdif::SDKUpdater::StartUpdateCheck();
-#endif
-	#else
-		Icon = nullptr;
+		#if USE_DARKEDIF_UPDATE_CHECKER
+			DarkEdif::SDKUpdater::StartUpdateCheck();
+		#endif
 	#endif // EditorBuild
 
 	if (!::SDK)
@@ -361,6 +359,7 @@ Edif::SDK::SDK(mv * mV, json_value &_json) : json (_json)
 	}
 
 	// Phi woz 'ere
+	#if EditorBuild
 	{
 		std::vector<PropData> VariableProps;
 		PropData * CurrentProperty;
@@ -590,12 +589,13 @@ Edif::SDK::SDK(mv * mV, json_value &_json) : json (_json)
 		// End with completely null byte
 		memset(&EdittimeProperties[VariableProps.size()], 0, sizeof(PropData));
 	}
+	#endif // EditorBuild
 
 	ActionMenu = LoadMenuJSON(Edif::ActionID(0), CurLang["ActionMenu"]);
 	ConditionMenu = LoadMenuJSON(Edif::ConditionID(0), CurLang["ConditionMenu"]);
 	ExpressionMenu = LoadMenuJSON(Edif::ExpressionID(0), CurLang["ExpressionMenu"]);
 
-	#if defined(_DEBUG) && !defined(IS_DARKEDIF_TEMPLATE)
+	#if defined(_DEBUG) && EditorBuild && !defined(IS_DARKEDIF_TEMPLATE)
 	const json_value &about = CurLang["About"];
 	bool unchangedPropsFound =
 		!_stricmp(about["Name"], "DarkEdif Template") ||
@@ -606,7 +606,8 @@ Edif::SDK::SDK(mv * mV, json_value &_json) : json (_json)
 	if (!unchangedPropsFound)
 	{
 		std::string copy = about["Copyright"];
-		std::transform(copy.begin(), copy.end(), copy.begin(), std::tolower);
+		std::transform(copy.begin(), copy.end(), copy.begin(),
+			[](unsigned char c) { return std::tolower(c); });
 		unchangedPropsFound = copy.rfind("by your name") != std::string::npos;
 	}
 	if (unchangedPropsFound)
@@ -628,9 +629,9 @@ Edif::SDK::~SDK()
 	delete [] ActionJumps;
 	delete [] ConditionJumps;
 	delete [] ExpressionJumps;
-	delete [] EdittimeProperties;
 
 #if EditorBuild
+	delete [] EdittimeProperties;
 	delete Icon;
 #endif
 }
@@ -833,7 +834,6 @@ long FusionAPI Edif::Expression(RUNDATA * rdPtr, long param)
 	rdPtr->pExtension->Runtime.param1 = param;
 	rdPtr->pExtension->Runtime.param2 = 0;
 
-
 	if (::SDK->ExpressionFunctions.size() < (unsigned int)ID)
 		return rdPtr->pExtension->Expression(ID, rdPtr, param);
 
@@ -847,10 +847,6 @@ long FusionAPI Edif::Expression(RUNDATA * rdPtr, long param)
 	const ACEInfo * Info = ::SDK->ExpressionInfos[ID];
 	ExpReturnType ExpressionRet = Info->Flags.ef;
 
-	if (ExpressionRet == ExpReturnType::Float)
-		rdPtr->rHo.Flags |= HeaderObjectFlags::Float;
-	else if (ExpressionRet == ExpReturnType::String)
-		rdPtr->rHo.Flags |= HeaderObjectFlags::String;
 	int ExpressionRet2 = (int)ExpressionRet;
 
 	int ParameterCount = Info->NumOfParams;
@@ -895,8 +891,6 @@ long FusionAPI Edif::Expression(RUNDATA * rdPtr, long param)
 	}
 
 	int Result;
-
-
 	__asm
 	{
 		pushad
@@ -945,6 +939,13 @@ long FusionAPI Edif::Expression(RUNDATA * rdPtr, long param)
 
 		popad
 	}
+
+	// Must be after the expression func is evaluated, as sub-expressions inside the
+	// expression func (e.g. from generating events) could change it to something else
+	if (ExpressionRet == ExpReturnType::Float)
+		rdPtr->rHo.Flags |= HeaderObjectFlags::Float;
+	else if (ExpressionRet == ExpReturnType::String)
+		rdPtr->rHo.Flags |= HeaderObjectFlags::String;
 
 	return Result;
 }
