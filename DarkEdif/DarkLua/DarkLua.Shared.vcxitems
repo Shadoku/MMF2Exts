@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{8002a7ce-24a0-4994-bda4-2b208fa7d7c5}</ItemsProjectGuid>
+    <ItemsProjectName>DarkLua.Shared</ItemsProjectName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory.TrimEnd('/\'))</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Inc\Shared\AllPlatformDefines.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Inc\Shared\DarkEdif.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Inc\Shared\Edif.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Inc\Shared\Strings.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Inc\Shared\json.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Inc\Shared\NonWindowsDefines.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\Inc\Shared\ObjectSelection.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Common.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Extension.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Lib\Shared\DarkEdif.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Lib\Shared\Edif.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Lib\Shared\Edif.General.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Lib\Shared\Edif.Runtime.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Lib\Shared\json.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\Lib\Shared\ObjectSelection.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Actions.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Conditions.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Expressions.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Extension.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Runtime.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lapi.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lauxlib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lbaselib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lcode.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lcorolib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lctype.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/ldblib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/ldebug.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/ldo.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/ldump.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lfunc.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lgc.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/linit.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/liolib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/llex.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lmathlib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lmem.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/loadlib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lobject.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lopcodes.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/loslib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lparser.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lstate.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lstring.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lstrlib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/ltable.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/ltablib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/ltm.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lundump.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lutf8lib.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lvm.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)lua/lzio.c" />
+</ItemGroup>
+</Project>
