@@ -78,6 +78,13 @@ public:
                 const TCHAR* EvalLua(const TCHAR* ExpressionText);
 
 
+        // Lua helpers for Fusion object access
+        static int Lua_ListObjects(lua_State* L);
+        static int Lua_GetPosition(lua_State* L);
+        static int Lua_SetPosition(lua_State* L);
+        static int Lua_GetAltValue(lua_State* L);
+        static int Lua_SetAltValue(lua_State* L);
+
 
 	/* These are called if there's no function linked to an ID */
 
