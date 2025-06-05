@@ -1,0 +1,292 @@
+﻿{
+	// 4-character identifer that uniquely identifies your extension.
+	// Can be letters, numbers, or punctuation, but must be 4 ASCII characters.
+	"Identifier": "DLUA",
+	"Dependencies": "",
+	"UK English": {
+		"About": {
+			"Name": "DarkLua",
+			"Author": "Codex",
+			"Copyright": "Copyright \u00A9 2024 by Your Name",
+			"Comment": "Lua scripting extension",
+			"Help": "Help/Example.chm",
+			"URL": "https://www.example.com/"
+		},
+                "ActionMenu": [
+                        [ 0, "Run Lua Script" ],
+                        [ 1, "Run Lua File" ],
+                        [ 2, "Create Context" ],
+                        [ 3, "Switch Context" ],
+                        "---",
+                        ""
+                ],
+		"ConditionMenu": [
+			[ 0, "Dummy condition" ]
+		],
+                "ExpressionMenu": [
+                        [ 0, "Evaluate" ],
+                        [ 1, "Current Context" ]
+                ],
+                "Actions": [
+                        {
+                                "Title": "Run(%0)",
+                                "Parameters": [
+                                        [ "Text", "Lua code" ]
+                                ]
+                        },
+                        {
+                                "Title": "RunFile(%0)",
+                                "Parameters": [
+                                        [ "Text", "File path" ]
+                                ]
+                        },
+                        {
+                                "Title": "CreateContext"
+                        },
+                        {
+                                "Title": "SetContext(%0)",
+                                "Parameters": [
+                                        [ "Integer", "Context index" ]
+                                ]
+                        }
+                ],
+                "Conditions": [
+                        {
+                                "Title": "DummyCondition",
+                                "Triggered": false
+                        }
+                ],
+                "Expressions": [
+                        {
+                                "Title": "Eval$(",
+                                "Returns": "Text",
+                                "Parameters": [
+                                        [ "Text", "Lua expression" ]
+                                ]
+                        },
+                        {
+                                "Title": "CurrentContext",
+                                "Returns": "Integer"
+                        }
+                ],
+		"Properties": [
+			{
+				"Title": "Folder of props",
+				"Info": "Folder information",
+				"Type": "Folder"
+			},
+			{
+				"Title": "Checkbox within folder",
+				"Info": "Should be bold text.",
+				"Type": "Checkbox",
+				"DefaultState": true, // or false
+				"Bold": true
+			},
+			{
+				"Type": "FolderEnd"
+			},
+			{
+				"Title": "Static text 1",
+				"Info": "Blank text",
+				"Type": "Text",
+				"DefaultState": "Static text, default state. Or default text."
+			},
+			{
+				"Title": "Static text 2",
+				"Info": "Blank text, bold",
+				"Type": "Text",
+				"DefaultState": "Bolded static text",
+				"Bold": true
+			},
+			{
+				"Title": "Editable 3",
+				"Info": "Shouldn't be bold.",
+				"Type": "Edit button",
+				"DefaultState": "Button text"
+			},
+			{
+				"Title": "Editable 4",
+				"Info": "Fusion ignores the bold setting.",
+				"Type": "Edit button",
+				"DefaultState": "Bolded button text",
+				"Bold": true
+			},
+			{
+				"Title": "Editable 5",
+				"Info": "Still set to bold, and bold is ignored.",
+				"DefaultState": "Default text",
+				"Type": "Editbox String",
+				"Bold": true
+			},
+			{
+				"Title": "Editable 6",
+				"Info": "Force uppercase on the input text.",
+				"Type": "Editbox String",
+				"DefaultState": "Default text, made uppercase",
+				"Case": "Upper"
+			},
+			{
+				"Title": "Editable 7",
+				"Info": "This one should be limited to 25 characters.",
+				"Type": "Editbox String",
+				"DefaultState": "Default text, made lowercase",
+				"Case": "Lower",
+				"MaxLength": 25
+			},
+			{
+				"Title": "Editable 8",
+				"Info": "Number limited between 20 and 25",
+				"Type": "Editbox Number",
+				"DefaultState": 21,
+				"Minimum": 20,
+				"Maximum": 25
+			}
+		]
+	},
+	"French": {
+		"About": {
+			"Name": "Exemple objet",
+			"Author": "Votre Nom",
+			"Copyright": "Copyright \u00A9 2022 par Votre Nom",
+			"Comment": "Une ou deux phrases pour décrire votre poste",
+			"Help": "Help/Example.chm",
+			"URL": "http://www.example.com/"
+		},
+                "ActionMenu": [
+                        [ 0, "Ex00E9cuter Lua" ],
+                        [ 1, "Ex00E9cuter Fichier" ],
+                        [ 2, "Cr00E9er Contexte" ],
+                        [ 3, "Changer Contexte" ],
+                        "---",
+                        [ "Sub Menu",
+                                [ 4, "Exemple deuxième action" ]
+                        ]
+                ],
+		"ConditionMenu": [
+			[ 0, "Sont deux nombres égaux?" ]
+		],
+                "ExpressionMenu": [
+                        [ 0, "Evaluer" ],
+                        [ 1, "Contexte Actuel" ]
+                ],
+                "Actions": [
+                        {
+                                "Title": "Exemple d'action avec le paramètre %0",
+                                "Parameters": [
+                                        [ "Integer", "Paramètre exemple" ]
+                                ]
+                        },
+                        {
+                                "Title": "RunFile(%0)",
+                                "Parameters": [ [ "Text", "Chemin" ] ]
+                        },
+                        { "Title": "CreateContext" },
+                        {
+                                "Title": "SetContext(%0)",
+                                "Parameters": [ [ "Integer", "Index" ] ]
+                        },
+                        {
+                                "Title": "Exemple deuxième action"
+                        }
+                ],
+		"Conditions": [
+			{
+				"Title": "%o : Sont de %0 et %1 égale?",
+				"Triggered": false,
+				"Parameters": [
+					[ "Integer", "Premier numéro" ],
+					[ "Integer", "Deuxième numéro" ]
+				]
+			}
+		],
+                "Expressions": [
+                        {
+                                "Title": "Eval$(",
+                                "Returns": "Integer",
+                                "Parameters": [
+                                        [ "Integer", "Premier numéro" ],
+                                        [ "Integer", "Deuxième numéro" ]
+                                ]
+                        },
+                        {
+                                "Title": "CurrentContext",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": " ",
+                                "Returns": "Text"
+                        }
+                ],
+		"Properties": [
+			{
+				"Title": "Folder",
+				"Info": "Folder d'information",
+				"Type": "Folder"
+			},
+				{
+					"Title": "Case à cocher dans le dossier",
+					"Info": "oui, il faut faire preuve d'audace.",
+					"Type": "Checkbox",
+					"Bold": true,
+					"DefaultState": true
+				},
+			{
+				"Type": "FolderEnd"
+			},
+			{
+				"Title": "Texte statique 1",
+				"Info": "Texte vide",
+				"Type": "Text"
+			},
+			{
+				"Title": "Texte statique 2",
+				"Info": "Texte vide, en caractères gras",
+				"Type": "Text",
+				"Bold": true
+			},
+			{
+				"Title": "Éditable 3",
+				"Info": "Ouais, il ne devrait pas faire preuve d'audace.",
+				"Type": "Edit button",
+				"DefaultState": "Bouton"
+			},
+			{
+				"Title": "Éditable 4",
+				"Info": "Ouais, il est très gras.",
+				"Type": "Edit button",
+				"DefaultState": "Bouton texte",
+				"Bold": true
+			},
+			{
+				"Title": "Éditable 5",
+				"Info": "Régulière chaîne de boîte d'édition.",
+				"Type": "Editbox String"
+			},
+			{
+				"Title": "Éditable 6",
+				"Info": "Celui-ci devrait obliger les majuscules.",
+				"Type": "Editbox String",
+				"Case": "Upper"
+			},
+			{
+				"Title": "Éditable 7",
+				"Info": "Celui-ci devrait être limité à 25 caractères.",
+				"Type": "Editbox String",
+				"Case": "Lower",
+				"MaxLength": 25
+			},
+			{
+				"Title": "Éditable 8",
+				"Info": "Celui-ci devrait être limité entre 20 et 25.",
+				"Type": "Editbox Number",
+				"Maximum": 25,
+				"Minimum": 20
+			}
+		]
+	}
+	/*
+	"German":
+	{},
+	"Japanese":
+	{}*/
+}
