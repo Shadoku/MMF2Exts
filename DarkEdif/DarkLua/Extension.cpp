@@ -55,6 +55,7 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
         L = luaL_newstate();
         luaL_openlibs(L);
 
+
         // register Fusion helper functions under table "fusion"
         lua_newtable(L);
         lua_pushlightuserdata(L, this);
@@ -78,6 +79,7 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
         lua_setfield(L, -2, "setAltValue");
 
         lua_setglobal(L, "fusion");
+
 
 
 	// Read object DarkEdif properties; you can pass property name, or property index
@@ -174,6 +176,7 @@ long Extension::UnlinkedCondition(int ID)
 
 long Extension::UnlinkedExpression(int ID)
 {
+
         DarkEdif::MsgBox::Error(_T("Extension::UnlinkedExpression() called"), _T("Running a fallback for expression ID %d. Make sure you ran LinkExpression()."), ID);
         // Unlinked A/C/E is fatal error, but try not to return null string and definitely crash it
         if ((size_t)ID < Edif::SDK->ExpressionInfos.size() && Edif::SDK->ExpressionInfos[ID]->Flags.ef == ExpReturnType::String)
@@ -284,4 +287,11 @@ int Extension::Lua_SetAltValue(lua_State* L)
                 ro->get_rov()->SetAltValueAtIndex(index, lua_tonumber(L, 3));
         }
         return 0;
+=======
+	DarkEdif::MsgBox::Error(_T("Extension::UnlinkedExpression() called"), _T("Running a fallback for expression ID %d. Make sure you ran LinkExpression()."), ID);
+	// Unlinked A/C/E is fatal error, but try not to return null string and definitely crash it
+	if ((size_t)ID < Edif::SDK->ExpressionInfos.size() && Edif::SDK->ExpressionInfos[ID]->Flags.ef == ExpReturnType::String)
+		return (long)Runtime.CopyString(_T(""));
+	return 0;
+
 }
