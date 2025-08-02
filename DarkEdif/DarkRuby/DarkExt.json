@@ -1,0 +1,79 @@
+{
+  "Identifier": "DRBY",
+  "Dependencies": "",
+  "UK English": {
+    "About": {
+      "Name": "DarkRuby",
+      "Author": "Codex",
+      "Copyright": "Copyright \u00A9 2024 by Codex",
+      "Comment": "Ruby scripting extension using Embers",
+      "Help": "Help/Example.chm",
+      "URL": "https://www.example.com/"
+    },
+    "ActionMenu": [
+      [0, "Run Ruby Script"],
+      [1, "Set Global Number"],
+      [2, "Set Global String"]
+    ],
+    "ConditionMenu": [
+      [0, "Dummy condition"]
+    ],
+    "ExpressionMenu": [
+      [0, "Evaluate"],
+      [1, "Get Global Number"],
+      [2, "Get Global String"]
+    ],
+    "Actions": [
+      {
+        "Title": "Run(%0)",
+        "Parameters": [
+          ["Text", "Ruby code"]
+        ]
+      },
+      {
+        "Title": "SetGlobalNumber(%0,%1)",
+        "Parameters": [
+          ["Text","Name"],
+          ["Value","Value"]
+        ]
+      },
+      {
+        "Title": "SetGlobalString(%0,%1)",
+        "Parameters": [
+          ["Text","Name"],
+          ["Text","Value"]
+        ]
+      }
+    ],
+    "Conditions": [
+      {
+        "Title": "DummyCondition",
+        "Triggered": false
+      }
+    ],
+    "Expressions": [
+      {
+        "Title": "Eval$(",
+        "Returns": "Text",
+        "Parameters": [
+          ["Text","Ruby expression"]
+        ]
+      },
+      {
+        "Title": "GetGlobalNumber(",
+        "Returns": "Value",
+        "Parameters": [
+          ["Text","Name"]
+        ]
+      },
+      {
+        "Title": "GetGlobalString$(",
+        "Returns": "Text",
+        "Parameters": [
+          ["Text","Name"]
+        ]
+      }
+    ],
+    "Properties": []
+  }
+}
