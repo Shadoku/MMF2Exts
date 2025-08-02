@@ -1,6 +1,7 @@
 #include "EmbersWrapper.hpp"
 
-#ifdef _WIN32
+// Managed Embers runtime only available when building with MSVC and /clr.
+#if defined(_MSC_VER) && defined(__CLR_VER)
 #using <mscorlib.dll>
 #using "Embers.dll"
 #include <msclr/marshal_cppstd.h>
