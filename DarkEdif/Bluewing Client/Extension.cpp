@@ -15,11 +15,11 @@ std::atomic<bool> Extension::AppWasClosed(false);
 Extension::Extension(RunObject* const _rdPtr, const EDITDATA* const edPtr, const CreateObjectInfo* const cobPtr) :
 	rdPtr(_rdPtr), rhPtr(_rdPtr->get_rHo()->get_AdRunHeader()), Runtime(this), FusionDebugger(this)
 #elif defined(__ANDROID__)
-Extension::Extension(const EDITDATA* const edPtr, const jobject javaExtPtr) :
+Extension::Extension(const EDITDATA* const edPtr, const jobject javaExtPtr, const CreateObjectInfo* const cobPtr) :
 	javaExtPtr(javaExtPtr, "Extension::javaExtPtr from Extension ctor"),
 	Runtime(this, this->javaExtPtr), FusionDebugger(this)
 #else
-Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
+Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr, const CreateObjectInfo* const cobPtr) :
 	objCExtPtr(objCExtPtr), Runtime(this, objCExtPtr), FusionDebugger(this)
 #endif
 {
@@ -114,6 +114,7 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
 		LinkAction(74, SendMsg_Resize);
 		// Added Blue-only actions
 		LinkAction(75, SetDestroySetting);
+		LinkAction(76, SetLocalPortForHolePunch);
 	}
 	{
 		LinkCondition(0, MandatoryTriggeredEvent /* OnError */);
@@ -262,7 +263,7 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
 	isGlobal = edPtr->isGlobal;
 
 #if EditorBuild
-	if (edPtr->eHeader.extSize < sizeof(EDITDATA))
+	if (edPtr->eHeader.extSize < sizeof(EDITDATA) || edPtr->eHeader.extVersion != Extension::Version)
 	{
 		DarkEdif::MsgBox::Error(_T("Property size mismatch"), _T("Properties are the wrong size (MFA size %lu, extension size %zu). "
 			"Please re-create the Lacewing Blue Client object in frame, "
@@ -984,10 +985,10 @@ REFLAG Extension::Handle()
 	// If Thread is not available, we have to tick() on Handle(), so
 	// we have to run next loop even if there's no events in EventsToRun to deal with.
 	bool runNextLoop = !globals->_thread.joinable();
-	size_t remainingCount = 0;
-	constexpr size_t maxNumEventsPerEventLoop = 10;
+	std::size_t remainingCount = 0;
+	constexpr std::size_t maxNumEventsPerEventLoop = 10;
 
-	for (size_t maxTrig = 0; maxTrig < maxNumEventsPerEventLoop; maxTrig++)
+	for (std::size_t maxTrig = 0; maxTrig < maxNumEventsPerEventLoop; ++maxTrig)
 	{
 		// Attempt to Enter, break if we can't get it instantly
 		if (!globals->lock.edif_try_lock())
@@ -1038,7 +1039,7 @@ REFLAG Extension::Handle()
 		for (auto i : globals->extsHoldingGlobals)
 		{
 			// Trigger all stored events (more than one may be stored by calling AddEvent(***, true) )
-			for (size_t u = 0; u < evtToRun->numEvents; ++u)
+			for (std::size_t u = 0; u < evtToRun->numEvents; ++u)
 			{
 				if (evtToRun->condTrig[u] != CLEAR_EVTNUM)
 				{
@@ -1102,6 +1103,10 @@ REFLAG Extension::Handle()
 		{
 			// Make a nice big error message.
 			std::tstringstream wstr;
+			#ifdef _MSC_VER
+				// No, it's not reading invalid data inside mandatoryEventIDs...
+				#pragma warning (suppress: 6385)
+			#endif
 			wstr << _T("") PROJECT_NAME " event occurred, but you have no \"" PROJECT_NAME " > "sv <<
 				mandatoryEventIDs[mandatoryEventIndex].first << _T("\" event to handle it. That is BAD PRACTICE");
 
@@ -1247,26 +1252,6 @@ killGlobalsAndExitThread:
 #endif
 	return;
 }
-
-// Called when Fusion wants your extension to redraw, due to window scrolling/resize, etc,
-// or from you manually causing it.
-REFLAG Extension::Display()
-{
-	// Return REFLAG::DISPLAY in Handle() to run this manually, or use Runtime.Redisplay().
-
-	return REFLAG::NONE;
-}
-
-// Called when Fusion runtime is pausing due to the menu option Pause or an extension causing it.
-short Extension::FusionRuntimePaused() {
-	return 0; // OK
-}
-
-// Called when Fusion runtime is resuming after a pause.
-short Extension::FusionRuntimeContinued() {
-	return 0; // OK
-}
-
 
 // These are called if there's no function linked to an ID
 

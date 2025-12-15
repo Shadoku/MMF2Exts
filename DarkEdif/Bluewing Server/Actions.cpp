@@ -171,7 +171,7 @@ int FindAllowListFromName(const TCHAR * listToSet)
 	std::transform(listToSetStr.begin(), listToSetStr.end(), listToSetStr.begin(),
 		[](const TCHAR c) { return ::_totlower(c); });
 
-	for (size_t i = 0; i < std::size(listNames); i++)
+	for (std::size_t i = 0; i < std::size(listNames); ++i)
 	{
 		if (listNames[i] == listToSetStr)
 			return (i % 4);
@@ -186,7 +186,7 @@ void Extension::SetUnicodeAllowList(const TCHAR * listToSet, const TCHAR * allow
 
 	const std::string err = Srv.setcodepointsallowedlist((lacewing::relayserver::codepointsallowlistindex)listIndex, DarkEdif::TStringToANSI(allowListContents));
 	if (!err.empty())
-		CreateError("Couldn't set Unicode %s allow list, %s.", listToSet, err.c_str());
+		CreateError("Couldn't set Unicode %s allow list, %s.", DarkEdif::TStringToUTF8(listToSet).c_str(), err.c_str());
 }
 
 
@@ -1339,7 +1339,11 @@ void Extension::BlastTextToChannel(int subchannel, const TCHAR * textToBlast)
 	if (selChannel->readonly())
 		return CreateError("Blast Text to Channel was called with a read-only channel, name %s.", selChannel->name().c_str());
 
-	selChannel->blast(subchannel, DarkEdif::TStringToUTF8(textToBlast), 0);
+	const std::string utf8Msg = DarkEdif::TStringToUTF8(textToBlast);
+	if (utf8Msg.size() > globals->maxUDPSize)
+		return CreateError("Blast Text to Channel was called with text too large (%zu bytes).", utf8Msg.size());
+
+	selChannel->blast(subchannel, utf8Msg, 0);
 }
 void Extension::BlastTextToClient(int subchannel, const TCHAR * textToBlast)
 {
@@ -1350,7 +1354,11 @@ void Extension::BlastTextToClient(int subchannel, const TCHAR * textToBlast)
 	if (selClient->readonly())
 		return CreateError("Blast Text to Client was called with a read-only client: ID %hu, name %s.", selClient->id(), selClient->name().c_str());
 
-	selClient->blast(subchannel, DarkEdif::TStringToUTF8(textToBlast), 0);
+	const std::string utf8Msg = DarkEdif::TStringToUTF8(textToBlast);
+	if (utf8Msg.size() > globals->maxUDPSize)
+		return CreateError("Blast Text to Client was called with text too large (%zu bytes).", utf8Msg.size());
+
+	selClient->blast(subchannel, utf8Msg, 0);
 }
 void Extension::BlastNumberToChannel(int subchannel, int numToBlast)
 {
@@ -1382,6 +1390,8 @@ void Extension::BlastBinaryToChannel(int subchannel)
 		CreateError("Blast Binary to Channel was called without a channel being selected.");
 	else if (selChannel->readonly())
 		CreateError("Blast Binary to Channel was called with a read-only channel, name %s.", selChannel->name().c_str());
+	else if (SendMsgSize > globals->maxUDPSize)
+		CreateError("Blast Binary to Channel was called with binary too large (%zu bytes).", SendMsgSize);
 	else
 		selChannel->blast(subchannel, std::string_view(SendMsg, SendMsgSize), 2);
 
@@ -1396,6 +1406,8 @@ void Extension::BlastBinaryToClient(int subchannel)
 		CreateError("Blast Binary to Client was called without a client being selected.");
 	else if (selClient->readonly())
 		CreateError("Blast Binary to Client was called with a read-only client: ID %hu, name %s.", selClient->id(), selClient->name().c_str());
+	else if (SendMsgSize > globals->maxUDPSize)
+		CreateError("Blast Binary to Client was called with binary too large (%zu bytes).", SendMsgSize);
 	else
 		selClient->blast(subchannel, std::string_view(SendMsg, SendMsgSize), 2);
 
@@ -1735,4 +1747,13 @@ void Extension::RecvMsg_AppendToFile(int passedPosition, int passedSize, const T
 		CreateError("Cannot append received binary to file \"%s\", error %i \"%s\""
 			" occurred with writing the end of the file.", DarkEdif::TStringToUTF8(filename).c_str(), errno, errtext);
 	}
+}
+void Extension::Relay_DoHolePunchToFutureClient(const TCHAR* clientIP, int localPort)
+{
+	if (localPort > 0xFFFF || localPort < 0)
+		return CreateError("Cannot hole punch with local port %d; invalid port.", localPort);
+	if (clientIP[0] == _T('\0'))
+		return CreateError("Cannot hole punch with blank remote IP.");
+
+	Srv.hole_punch(DarkEdif::TStringToANSI(clientIP).c_str(), (lw_ui16)localPort);
 }

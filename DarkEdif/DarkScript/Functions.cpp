@@ -403,7 +403,7 @@ std::tstring Extension::Sub_GetValAsString(const Extension::Value &val)
 // Defined in DarkEdif.cpp
 ACEInfo * Edif::ACEInfoAlloc(unsigned int NumParams);
 
-#define lastNonDummyFunc (CurLang["Expressions"].u.array.length)
+#define lastNonDummyFunc (CurLang["Expressions"sv].u.array.length)
 constexpr short lastNonFuncID = 59;
 // 5 parameters seems to be the maximum Fusion supports, because there is a hard cap of around 5,582 expression IDs.
 // Any further and CF2.5 crashes when you try to add an action. MMF2 Standard staggers after 5632, and dies completely at 5647.
@@ -441,7 +441,7 @@ constexpr int64_t ipow(int64_t base, int exp, int64_t result = 1)
 constexpr int64_t duet(int64_t base, int exp)
 {
 	int64_t sum = 1;
-	for (int i = 0; i < exp; i++)
+	for (int i = 0; i < exp; ++i)
 		sum += ipow(base, i + 1);
 	return sum;
 }
@@ -453,14 +453,14 @@ constexpr size_t numFuncVariantsToGenerateMMF2 =
 	// multiplied by variants of parameter types...
 	((int)duet((int)Extension::Type::NumCallableParamTypes,
 		// multiplied by max number of parameters
-		numParamsToAllow)));
+		std::min(numParamsToAllow, 5))));
 constexpr size_t numFuncVariantsToGenerateCF25 =
 // Variants of return types...
 (((Flags::Both + 1) * ((int)Extension::Type::NumCallableReturnTypes)) *
 	// multiplied by variants of parameter types...
 	((int)duet((int)Extension::Type::NumCallableParamTypes,
 		// multiplied by max number of parameters
-		6)));
+		std::min(numParamsToAllow, 6))));
 
 static void GenerateExpressionFuncFor(const int inputID)
 {
@@ -473,7 +473,7 @@ static void GenerateExpressionFuncFor(const int inputID)
 	Flags flags = (Flags)(funcID & Flags::Both);
 	funcID = (funcID / NumVariants); // remove last two bits (Flags) and shift remaining down in their place
 
-	//for (int i = 0; i < 30; i++)
+	//for (int i = 0; i < 30; ++i)
 	//	LOGI(_T("Anticipating that for function ID %i, %i is the template.\n"), i, (i - 4 - (i % 4)));
 
 	ACEInfo * last;
@@ -514,7 +514,7 @@ static void GenerateExpressionFuncFor(const int inputID)
 	{
 		needNewParam = true;
 		// Skip parameter 0 (function ID) - bear in mind last is None variant, so no repeat count
-		for (std::size_t i = 1; i < (std::size_t)last->NumOfParams; i++)
+		for (std::size_t i = 1; i < (std::size_t)last->NumOfParams; ++i)
 		{
 			if (GetParam(i) != Extension::Type::Float)
 			{
@@ -539,7 +539,7 @@ static void GenerateExpressionFuncFor(const int inputID)
 	assert(!needNewParam || returnType == Extension::Type::Integer);
 
 	int intermediate = (funcID / (int)Extension::Type::NumCallableReturnTypes) - 1;
-	for (size_t i = paramTypes.size(); i < (size_t)(last->NumOfParams + (needNewParam ? 1 : 0) + (flags & Flags::Repeat ? 1 : 0)); i++)
+	for (std::size_t i = paramTypes.size(); i < (std::size_t)(last->NumOfParams + (needNewParam ? 1 : 0) + ((flags & Flags::Repeat) != Flags::None ? 1 : 0)); ++i)
 	{
 		// too many params?
 		if (intermediate < 0)
@@ -780,11 +780,11 @@ void FusionAPI GetExpressionParam(mv* mV, short code, short param, TCHAR* strBuf
 	if (Edif::IS_COMPATIBLE(mV))
 	{
 		if ((size_t)code < lastNonDummyFunc)
-			Edif::ConvertAndCopyString(strBuf, CurLang["Expressions"][code]["Parameters"][param][1], maxLen);
+			Edif::ConvertAndCopyString(strBuf, CurLang["Expressions"sv][code]["Parameters"sv][param][1], maxLen);
 		else if ((size_t)code <= lastNonFuncID)
 		{
 			DarkEdif::MsgBox::Error(_T("Shouldn't happen"), _T("Should never happen. Param requested for dummy function."));
-			Edif::ConvertAndCopyString(strBuf, "COUGH", maxLen);
+			Edif::ConvertAndCopyString(strBuf, "COUGH"sv, maxLen);
 		}
 		else
 		{
@@ -838,14 +838,14 @@ void FusionAPI GetExpressionTitle(mv* mV, short code, TCHAR* strBuf, short maxLe
 
 	if ((size_t)code < lastNonDummyFunc)
 	{
-		std::string Return(CurLang["Expressions"][code]["Title"]);
+		std::string Return(CurLang["Expressions"sv][code]["Title"sv]);
 		if (Return.back() != '(')
 			Return.push_back('(');
 		Edif::ConvertAndCopyString(strBuf, Return.c_str(), maxLen);
 	}
 	else if ((size_t)code <= lastNonFuncID)
 	{
-		Edif::ConvertAndCopyString(strBuf, "DummyFunc(", maxLen);
+		Edif::ConvertAndCopyString(strBuf, "DummyFunc("sv, maxLen);
 	}
 	else
 	{
@@ -865,7 +865,7 @@ void FusionAPI GetExpressionTitle(mv* mV, short code, TCHAR* strBuf, short maxLe
 		if (origFuncID & Flags::Repeat)
 			++i; // skip repeat count parameter if present
 
-		for (; i < (size_t)exp.NumOfParams; i++)
+		for (; i < (size_t)exp.NumOfParams; ++i)
 		{
 			if (exp.Parameter[i].ep == ExpParams::String)
 				str << 'S';
@@ -970,7 +970,7 @@ long Extension::VariableFunction(const TCHAR* funcName, const ACEInfo& exp, long
 		funcTemplateIt = funcTemplateIt2;
 	}
 
-	size_t expParamIndex = 1; // skip func name (index 0), we already read it
+	std::size_t expParamIndex = 1; // skip func name (index 0), we already read it
 	// If 0, then function does not run
 	int repeatTimes = 1;
 
@@ -1010,7 +1010,7 @@ long Extension::VariableFunction(const TCHAR* funcName, const ACEInfo& exp, long
 		LOGW(_T("Generating anonymous function \"%s\".\n"), funcName);
 		funcTemplate = std::make_shared<FunctionTemplate>(this, funcName, Expected::Either, Expected::Either, true, (Extension::Type)((int)exp.Flags.ef + 1));
 		TCHAR name[3] = { _T('a'), _T('\0') };
-		for (size_t i = expParamIndex; i < (size_t)exp.NumOfParams; i++, ++name[0])
+		for (std::size_t i = expParamIndex; i < (size_t)exp.NumOfParams; ++i, ++name[0])
 		{
 			// Note the ++name[0] in for(;;><), gives variable names a, b, c
 			Type type = exp.Parameter[i].ep == ExpParams::String ? Type::String :
@@ -1047,7 +1047,7 @@ long Extension::VariableFunction(const TCHAR* funcName, const ACEInfo& exp, long
 		}
 
 		// Too many parameters (ignore func name and repeat count)
-		if (((size_t)exp.NumOfParams - expParamIndex) > funcTemplate->params.size())
+		if (((std::size_t)exp.NumOfParams - expParamIndex) > funcTemplate->params.size())
 			CreateError2V("Can't call function %s with %hi parameters, template expects up to %zu parameters.", funcTemplate->name.c_str(), exp.NumOfParams, funcTemplate->params.size());
 
 		// This template was made with a valid global ID that had an ext, but the ext vanished
@@ -1077,8 +1077,8 @@ long Extension::VariableFunction(const TCHAR* funcName, const ACEInfo& exp, long
 	newFunc->isVoidRun = isVoidRun;
 	newFunc->redirectedFromFunctionName = redirectedFromName;
 
-	size_t numNotInParamsVector = expParamIndex;
-	size_t numPassedExpFuncParams = exp.NumOfParams - numNotInParamsVector; // ignore func name and num repeats
+	std::size_t numNotInParamsVector = expParamIndex;
+	std::size_t numPassedExpFuncParams = exp.NumOfParams - numNotInParamsVector; // ignore func name and num repeats
 
 	newFunc->numPassedParams = numPassedExpFuncParams;
 
@@ -1088,9 +1088,9 @@ long Extension::VariableFunction(const TCHAR* funcName, const ACEInfo& exp, long
 
 	// don't confuse expParamIndex (A/C/E, will include funcName, may include numRepeats)
 	// vs. paramIndex (index of paramValues)
-	size_t paramIndex = 0;
+	std::size_t paramIndex = 0;
 
-	for (; paramIndex < numPassedExpFuncParams; paramIndex++)
+	for (; paramIndex < numPassedExpFuncParams; ++paramIndex)
 	{
 		Extension::Type paramTypeInTemplate = newFunc->funcTemplate->params[paramIndex].type;
 
@@ -1156,7 +1156,7 @@ long Extension::VariableFunction(const TCHAR* funcName, const ACEInfo& exp, long
 	}
 
 	// User didn't pass these, but template expects them; load from param defaults
-	for (; paramIndex < funcTemplate->params.size(); paramIndex++)
+	for (; paramIndex < funcTemplate->params.size(); ++paramIndex)
 	{
 		// No default, and user didn't pass one: no good.
 		if (funcTemplate->params[paramIndex].type != Extension::Type::Any &&
@@ -1173,9 +1173,20 @@ long Extension::VariableFunction(const TCHAR* funcName, const ACEInfo& exp, long
 
 	if (newFunc->active)
 	{
+		// Always save selection and restore after action, even for non-K func;
+		// if newFunc->keepObjectSelection is set (K-func), then the On Function
+		// condition will restore for start of each On Function event
+		evt_SaveSelectedObjects(newFunc->selectedObjects);
+
 		newFunc->runLocation = Sub_GetLocation(actID);
+		newFunc->expectedReturnType = (Type)((int)exp.Flags.ef + 1);
+		// TODO: Conversion strictness checks, e.g.
+		// if (newFunc->funcTemplate->returnType != newFunc->expectedReturnType)
+
 		long l = ExecuteFunction(nullptr, newFunc);
 		newFunc->runLocation.clear();
+
+		evt_RestoreSelectedObjects(newFunc->selectedObjects, true);
 		return l;
 	}
 
@@ -1268,7 +1279,7 @@ std::tstring Extension::Sub_GetLocation(int actID)
 
 		auto cur = evg->GetCAByIndex(0);
 		std::size_t i = 0;
-		for (; i < evg->get_evgNCond(); i++)
+		for (; i < evg->get_evgNCond(); ++i)
 			cur = cur->Next();
 		short lastOI = cur->get_evtOi();
 		std::tstringstream str;
@@ -1462,15 +1473,19 @@ long Extension::ExecuteFunction(RunObjectMultiPlatPtr objToRunOn, const std::sha
 			(rf->isVoidRun && whenAllowNoRVSet >= AllowNoReturnValue::ForeachDelayedActionsOnly) ||
 			(rf->funcTemplate->isAnonymous && whenAllowNoRVSet >= AllowNoReturnValue::AnonymousForeachDelayedActions))
 		{
-			LOGV(_T("%sFunction \"%s\" has no default return value, and no return value was set by any On %sFunction \"%s\" events."
-				"Due to \"allow no default value\" property, ignoring it and returning 0/\"\"."),
+			LOGV(_T("%sFunction \"%s\" has no default return value, and no return value was set by any On %sFunction \"%s\" events. "
+				"Due to \"allow no default value\" property, ignoring it and returning 0/\"\".\n"),
 				objToRunOn ? _T("Foreach ") : _T(""), rf->funcTemplate->name.c_str(),
 				objToRunOn ? _T("Foreach ") : _T(""), rf->funcTemplate->name.c_str());
 			// Return to calling expression - return int and float directly as they occupy same memory address
+			rf->returnValue.type = rf->expectedReturnType;
 			if (rf->returnValue.type != Extension::Type::String)
 				rf->returnValue.dataSize = sizeof(int); // or sizeof float, same thing
 			else
+			{
+				rf->returnValue.dataSize = sizeof(TCHAR);
 				rf->returnValue.data.string = _tcsdup(_T(""));
+			}
 		}
 		// else error: do foreach error, or do normal error
 		else if (objToRunOn)
@@ -1516,45 +1531,77 @@ long Extension::ExecuteFunction(RunObjectMultiPlatPtr objToRunOn, const std::sha
 	lastReturn = rf->returnValue;
 
 	// Return to calling expression - return int and float directly as they occupy same memory address
-	if (rf->returnValue.type != Extension::Type::String)
-		return (long)rf->returnValue.data.integer;
-
-	// Clone string
-	const TCHAR * tc = rf->returnValue.data.string;
-	// assert(tc); // shouldn't have it as null under any scenario
-	tc = tc ? tc : _T("");
-	return (long)Runtime.CopyString(tc);
+	if (rf->expectedReturnType == Extension::Type::String)
+		return (long)Runtime.CopyString(Sub_GetValAsString(rf->returnValue).c_str());
+	if (rf->expectedReturnType == Extension::Type::Float)
+	{
+		const float f = Sub_GetValAsFloat(rf->returnValue);
+		return *(int*)&f;
+	}
+	if (rf->expectedReturnType == Extension::Type::Integer)
+		return Sub_GetValAsInteger(rf->returnValue);
+	return 0;
 }
 
 // Save object selection
-void Extension::evt_SaveSelectedObjects(std::vector<FusionSelectedObjectListCache>& selectedObjects)
+void Extension::evt_SaveSelectedObjects(std::vector<FusionSelectedObjectListCache>& selectedObjects, short excludeOi)
 {
 	bool wasFound = false;
 	const short DSOi = rdPtr->get_rHo()->get_Oi();
+	std::vector<short> excludeOis;
+	if (excludeOi > -1)
+	{
+		excludeOis.push_back(excludeOi);
+		LOGD(_T("Should skip oi %hi (%s), it should be a foreach target?\n"),
+			excludeOi, rhPtr->GetOIListByIndex(excludeOi)->get_name());
+	}
+	else if (excludeOi != -1)
+	{
+		excludeOis = rhPtr->GetQualToOiListByOffset(excludeOi)->GetAllOi();
+		LOGD(_T("Should skip qualifier oi %hi, it should be a foreach target?\n"), excludeOi);
+	}
+	else
+		LOGD(_T("No objects to skip.\n"));
+
+	std::size_t numAllOi = 0;
+	short oiListIndex = -1;
 	for (auto poil : DarkEdif::AllOIListIterator(rhPtr))
 	{
+		++oiListIndex;
+		++numAllOi;
+
 		// Skip our ext, it'll always appear in selection as it's how this code right here in our ext is running
 		// Since every generated condition will use DarkScript, we shouldn't need to re-select after generated events finish
 		// although... if the user is strange enough to mix DS with other loop-type objects, maybe.
 		if (poil->get_Oi() == DSOi)
 		{
-			LOGV(_T("Skipping object \"%s\", oi %i, it should be DarkScript.\n"), poil->get_name(), poil->get_Oi());
+			LOGD(_T("Skipping object \"%s\", oi %i, it should be DarkScript.\n"), poil->get_name(), poil->get_Oi());
 			wasFound = true;
+			continue;
+		}
+		if (!excludeOis.empty() &&
+			std::find(excludeOis.cbegin(), excludeOis.cend(), poil->get_Oi()) != excludeOis.cend())
+		{
+			LOGD(_T("Skipping object \"%s\", oi %i, it should be a foreach target and cannot be saved in K.\n"), poil->get_name(), poil->get_Oi());
 			continue;
 		}
 
 		// Selection was caused by condition, or by action
 		if (poil->get_EventCount() != rhPtr->GetRH2EventCount())
 		{
-			LOGV(_T("Skipping object \"%.*s\", event count differs (it is %i, but should be %i) so it is not selected.\n"),
+			LOGD(_T("Skipping object \"%.*s\", event count differs (it is %i, but should be %i) so it is not selected.\n"),
 				std::isprint(poil->get_name()[0] & 0x7F) ? 24 : 3,
 				poil->get_name(), poil->get_EventCount(), rhPtr->GetRH2EventCount());
 			continue;
 		}
+		LOGD(_T("Adding an object \"%.*s\", event count same (oil ec %i, rh ec %i) so it is selected.\n"),
+			std::isprint(poil->get_name()[0] & 0x7F) ? 24 : 3,
+			poil->get_name(), poil->get_EventCount(), rhPtr->GetRH2EventCount());
+
 		// Already in the list?
 		// TODO: Is this even possible? Multiple CRuns, maybe, but rhPtr is one CRun.
 		int j;
-		for (j = 0; j < (int)selectedObjects.size(); j++)
+		for (j = 0; j < (int)selectedObjects.size(); ++j)
 		{
 			if (selectedObjects[j].poil == poil)
 				break;
@@ -1579,21 +1626,28 @@ void Extension::evt_SaveSelectedObjects(std::vector<FusionSelectedObjectListCach
 
 		// Store explicitly selected objects; we ignore Implicit via eventcount check anyway
 		std::size_t numSelected = 0;
-		for (auto pHoFound : DarkEdif::ObjectIterator(rhPtr, poil->get_Oi(), DarkEdif::Selection::Explicit))
+		for (auto pHoFound : DarkEdif::ObjectIterator(rhPtr, oiListIndex, DarkEdif::Selection::Explicit))
 		{
 			//auto&& pHoFound = rhPtr->GetObjectListOblOffsetByIndex(num);
 			// TODO: With multiple CRuns revealed, is this still functional across subapps?
 			if (pHoFound == rdPtr)
 				wasFound = true;
-			if (pHoFound == NULL)
-				break;
 			++numSelected;
-			pSel->selectedObjects.push_back(pHoFound->get_rHo()->get_Oi());
-		//	num = pHoFound->get_rHo()->get_NextSelected();
+			pSel->selectedObjects.push_back(pHoFound->get_rHo()->get_Number());
+			LOGV(_T("Added object selection instance: object \"%s\" hoNumber %hi. ListSelected number is %hi,"
+				" Object is %hi, ho eventCount %i ==? oil %i.\n"),
+				pSel->poil->get_name(), pSel->selectedObjects.back(), pSel->poil->get_ListSelected(), pSel->poil->get_Object(),
+				rhPtr->GetRH2EventCount(), pSel->poil->get_EventCount());
 		}
 		if (numSelected > 0)
 			LOGI(_T("Added object selection: object \"%s\" num instances %zu.\n"), pSel->poil->get_name(), pSel->selectedObjects.size());
 	}
+	LOGD(_T("Save obj select done: %zu objects.\n"), selectedObjects.size());
+
+	if (numAllOi == 0)
+		LOGE(_T("Save obj select FAILED: %zu oilist.\n"), numAllOi);
+	else
+		LOGD(_T("Save obj select note: %zu oilist total.\n"), numAllOi);
 
 	if (!wasFound)
 		LOGE(_T("Couldn't find DarkScript in selected objects!\n"));
@@ -1611,16 +1665,27 @@ void Extension::evt_RestoreSelectedObjects(const std::vector<FusionSelectedObjec
 			if (poil->get_Oi() == rdPtr->get_rHo()->get_Oi())
 				continue;
 
+			// If we're manually selecting, then don't reset selection
+			if (std::find_if(selectedObjects.cbegin(), selectedObjects.cend(),
+				[&poil](const FusionSelectedObjectListCache& f) {
+					return f.poil == poil;
+				}) != selectedObjects.cend())
+			{
+				continue;
+			}
+
 			// Invalidate the selection by making the event count not match, as opposed to explicitly selecting all
 			poil->SelectAll(rhPtr, false);
 		}
 	}
 
 	const int rh2EventCount = rhPtr->GetRH2EventCount();
-	for (int i = 0; i < (int)selectedObjects.size(); i++)
+	for (std::size_t i = 0; i < (int)selectedObjects.size(); ++i)
 	{
 		const FusionSelectedObjectListCache& sel = selectedObjects[i];
 		auto & poil = sel.poil;
+		LOGD(_T("Restoring obj select: running for %s, with %zu saved instances.\n"), poil->get_name(),
+			sel.selectedObjects.size());
 
 		poil->set_EventCount(rh2EventCount);
 		poil->set_ListSelected(-1);
@@ -1632,7 +1697,7 @@ void Extension::evt_RestoreSelectedObjects(const std::vector<FusionSelectedObjec
 			{
 				poil->set_ListSelected(sel.selectedObjects[0]);
 				poil->set_NumOfSelected(poil->get_NumOfSelected()+1);
-				for (int j = 1; j < (int)sel.selectedObjects.size(); j++)
+				for (std::size_t j = 1; j < (int)sel.selectedObjects.size(); ++j)
 				{
 					short num = sel.selectedObjects[j];
 					auto&& pHo = rhPtr->GetObjectListOblOffsetByIndex(num);
@@ -1647,11 +1712,14 @@ void Extension::evt_RestoreSelectedObjects(const std::vector<FusionSelectedObjec
 			}
 		}
 	}
+
+	LOGE(_T("Restoring object selection done.\n"));
 }
 
 void Extension::Sub_RunPendingForeachFunc(const short oil, const std::shared_ptr<RunningFunction> &runningFunc)
 {
-	LOGI(_T("Sub_RunPendingForeachFunc executing for oil %hi (non-qual: %hi), function \"%s\".\n"),
+	LOGI(_T("Sub_RunPendingForeachFunc executing on event %i for oil %hi (non-qual: %hi), function \"%s\".\n"),
+		DarkEdif::GetCurrentFusionEventNum(this),
 		oil, (short)(oil & 0x7FFF), runningFunc->funcTemplate->name.c_str());
 
 	std::vector<RunObjectMultiPlatPtr> list;
@@ -1669,7 +1737,7 @@ void Extension::Sub_RunPendingForeachFunc(const short oil, const std::shared_ptr
 	}
 
 	std::vector<FusionSelectedObjectListCache> selObjList;
-	evt_SaveSelectedObjects(selObjList);
+	evt_SaveSelectedObjects(selObjList, oil);
 
 #if (DARKEDIF_LOG_MIN_LEVEL <= DARKEDIF_LOG_INFO)
 	size_t totalSel = 0;
@@ -1687,7 +1755,7 @@ void Extension::Sub_RunPendingForeachFunc(const short oil, const std::shared_ptr
 		if ((pHo->get_Flags() & HeaderObjectFlags::Destroyed) != HeaderObjectFlags::None)
 			continue;
 
-		LOGI(_T("Event %i running current foreach func \"%s\" for object \"%s\", FV %i, num %hi [object list], oi %hi [oilist].\n"),
+		LOGI(_T("Event %i running current foreach func \"%s\" for object \"%s\", FV %i, num %hi [object list], oi %hi [oilist id].\n"),
 			DarkEdif::GetCurrentFusionEventNum(this),
 			runningFunc->funcTemplate->name.c_str(), pHo->get_OiList()->get_name(),
 			pHo->GetFixedValue(), pHo->get_Number(), pHo->get_Oi());

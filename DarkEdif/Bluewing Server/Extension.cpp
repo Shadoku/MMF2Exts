@@ -14,11 +14,11 @@ std::atomic<bool> Extension::AppWasClosed(false);
 Extension::Extension(RunObject* const _rdPtr, const EDITDATA* const edPtr, const CreateObjectInfo* const cobPtr) :
 	rdPtr(_rdPtr), rhPtr(_rdPtr->get_rHo()->get_AdRunHeader()), Runtime(this), FusionDebugger(this)
 #elif defined(__ANDROID__)
-Extension::Extension(const EDITDATA* const edPtr, const jobject javaExtPtr) :
+Extension::Extension(const EDITDATA* const edPtr, const jobject javaExtPtr, const CreateObjectInfo* const cobPtr) :
 	javaExtPtr(javaExtPtr, "Extension::javaExtPtr from Extension ctor"),
 	Runtime(this, this->javaExtPtr), FusionDebugger(this)
 #else
-Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
+Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr, const CreateObjectInfo* const cobPtr) :
 	objCExtPtr(objCExtPtr), Runtime(this, objCExtPtr), FusionDebugger(this)
 #endif
 {
@@ -131,6 +131,7 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
 		LinkAction(91, WebSocketServer_EnableHosting);
 		LinkAction(92, WebSocketServer_DisableHosting);
 		LinkAction(93, Channel_SelectByID);
+		LinkAction(94, Relay_DoHolePunchToFutureClient);
 	}
 	{
 		LinkCondition(0, AlwaysTrue /* OnError */);
@@ -257,7 +258,7 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
 	}
 
 #if EditorBuild
-	if (edPtr->eHeader.extSize < sizeof(EDITDATA))
+	if (edPtr->eHeader.extSize < sizeof(EDITDATA) || edPtr->eHeader.extVersion != Extension::Version)
 	{
 		DarkEdif::MsgBox::Error(_T("Property size mismatch"), _T("Properties are the wrong size (MFA size %lu, extension size %zu). "
 			"Please re-create the Lacewing Blue Server object in frame, "
@@ -1128,7 +1129,7 @@ REFLAG Extension::Handle()
 	// we have to run next loop even if there's no events in EventsToRun to deal with.
 	bool RunNextLoop = !globals->_thread.joinable();
 
-	for (size_t maxTrig = 0; maxTrig < 10; maxTrig++)
+	for (std::size_t maxTrig = 0; maxTrig < 10; ++maxTrig)
 	{
 		// Attempt to Enter, break if we can't get it instantly
 		if (!globals->lock.edif_try_lock())
@@ -1259,8 +1260,6 @@ void Extension::HandleInteractiveEvent(std::shared_ptr<EventToRun> evt)
 			EnterSectionIfMultiThread(globals->lock);
 			Srv.nameset_response(evt->senderClient, NewClientName, DenyReason.c_str());
 
-			if (!DenyReason.empty())
-				evt->senderClient->name(NewClientName);
 			LeaveSectionIfMultiThread(globals->lock);
 		}
 	}
@@ -1587,24 +1586,6 @@ Extension::~Extension()
 	}
 	selClient = nullptr;
 	selChannel = nullptr;
-}
-// Called when Fusion wants your extension to redraw, due to window scrolling/resize, etc,
-// or from you manually causing it.
-REFLAG Extension::Display()
-{
-	// Return REFLAG::DISPLAY in Handle() to run this manually, or use Runtime.Redisplay().
-
-	return REFLAG::NONE;
-}
-
-// Called when Fusion runtime is pausing due to the menu option Pause or an extension causing it.
-short Extension::FusionRuntimePaused() {
-	return 0; // OK
-}
-
-// Called when Fusion runtime is resuming after a pause.
-short Extension::FusionRuntimeContinued() {
-	return 0; // OK
 }
 
 // These are called if there's no function linked to an ID

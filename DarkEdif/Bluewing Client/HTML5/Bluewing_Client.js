@@ -1,5 +1,5 @@
 /*
-	This Lacewing Blue Client Fusion extension HTML5 port is copyright © 2024 by Darkwire Software.
+	This Lacewing Blue Client Fusion extension HTML5 port is copyright © 2025 by Darkwire Software.
 	Any redistribution is expressly prohibited outside of the official channels.
 	It is expressly forbidden to acquire these files from GitHub for free for personal or commercial use;
 	in other words, if there is a fee to acquire or use this port, any developers must pay for it and only
@@ -144,7 +144,7 @@ globalThis['darkEdif'] = (globalThis['darkEdif'] && globalThis['darkEdif'].sdkVe
 		let that = this;
 		let GetPropertyIndex = function(chkIDOrName) {
 			if (typeof chkIDOrName == 'number') {
-				if (that.numProps >= chkIDOrName) {
+				if (that.numProps <= chkIDOrName) {
 					throw "Invalid property ID " + chkIDOrName + ", max ID is " + (that.numProps - 1) + ".";
 				}
 				return chkIDOrName;
@@ -255,7 +255,7 @@ function CRunBluewing_Client() {
 
 	// DarkEdif SDK exts should have these four variables defined.
 	// We need this[] and globalThis[] instead of direct because HTML5 Final Project minifies and breaks the names otherwise
-	this['ExtensionVersion'] = 104; // To match C++ version
+	this['ExtensionVersion'] = 105; // To match C++ version
 	this['SDKVersion'] = 19;
 	this['DebugMode'] = false;
 	this['ExtensionName'] = 'Bluewing Client';
@@ -357,10 +357,17 @@ function CRunBluewing_Client() {
 		}
 		return true;
 	};
-	this.Check_TextMsgValue = function (textMsg, func) {
+	this.Check_TextMsgValue = function (textMsg, func, isUDPMsg) {
 		if (textMsg == null) {
 			this.CreateError("Error: " + func + " was called with a null parameter");
 			return false;
+		}
+		if (isUDPMsg) {
+			let byteLength = this.textEncoder.encode(textMsg).byteLength;
+			if (byteLength > this.globals.maxUDPSize) {
+				this.CreateError("Error: " + func + " was called with text too large (" + byteLength + " bytes)");
+				return false;
+			}
 		}
 		return true;
 	};
@@ -389,6 +396,13 @@ function CRunBluewing_Client() {
 	this.Check_UnlockedSendMsg = function (func) {
 		if (this.globals.sendMsgLocked) {
 			this.CreateError(func + " was called while the binary blob is being loaded in background.");
+			return false;
+		}
+		return true;
+	};
+	this.Check_BinaryUDPSized = function (func) {
+		if (this.globals.sendMsg.byteLength > this.globals.maxUDPSize) {
+			this.CreateError(func + " was called with binary too large (" + this.globals.sendMsg.byteLength + " bytes).");
 			return false;
 		}
 		return true;
@@ -609,8 +623,8 @@ function CRunBluewing_Client() {
 		/// <param name="subChannel" type="Number"> An 8-bit unsigned number, 0-255. </param>
 		/// <param name="textToSend" type="String"> Text to send. Can be blank. </param>
 		subChannel = ~~subChannel;
-		if (!this.Check_Subchannel(subChannel, "Send Text to Channel") ||
-			!this.Check_TextMsgValue(textToSend, "Send Text to Channel")) {
+		if (!this.Check_Subchannel(subChannel, "Send Text to Server") ||
+			!this.Check_TextMsgValue(textToSend, "Send Text to Server", false)) {
 			return;
 		}
 		this.globals.client.SendMsg(subChannel, this.$StringToArrayBuffer(textToSend), 0);
@@ -621,7 +635,7 @@ function CRunBluewing_Client() {
 		/// <param name="textToSend" type="String"> Text to send. Can be blank. </param>
 		subChannel = ~~subChannel;
 		if (!this.Check_Subchannel(subChannel, "Send Text to Channel") ||
-			!this.Check_TextMsgValue(textToSend, "Send Text to Channel") ||
+			!this.Check_TextMsgValue(textToSend, "Send Text to Channel", false) ||
 			!this.Check_ChannelSelection("Send Text to Channel")) {
 			return;
 		}
@@ -633,7 +647,7 @@ function CRunBluewing_Client() {
 		/// <param name="textToSend" type="String"> Text to send. Can be blank. </param>
 		subChannel = ~~subChannel;
 		if (!this.Check_Subchannel(subChannel, "Send Text to Peer") ||
-			!this.Check_TextMsgValue(textToSend, "Send Text to Peer") ||
+			!this.Check_TextMsgValue(textToSend, "Send Text to Peer", false) ||
 			!this.Check_PeerSelection("Send Text to Peer")) {
 			return;
 		}
@@ -683,7 +697,7 @@ function CRunBluewing_Client() {
 		/// <param name="textToBlast" type="String"> Text to blast. Can be blank. </param>
 		subChannel = ~~subChannel;
 		if (!this.Check_Subchannel(subChannel, "Blast Text to Server") ||
-			!this.Check_TextMsgValue(textToBlast, "Blast Text to Server")) {
+			!this.Check_TextMsgValue(textToBlast, "Blast Text to Server", true)) {
 			return;
 		}
 		this.globals.client.BlastMsg(subChannel, this.$StringToArrayBuffer(textToBlast), 0);
@@ -694,7 +708,7 @@ function CRunBluewing_Client() {
 		/// <param name="textToBlast" type="String"> Text to blast. Can be blank. </param>
 		subChannel = ~~subChannel;
 		if (!this.Check_Subchannel(subChannel, "Blast Text to Channel") ||
-			!this.Check_TextMsgValue(textToBlast, "Blast Text to Channel") ||
+			!this.Check_TextMsgValue(textToBlast, "Blast Text to Channel", true) ||
 			!this.Check_ChannelSelection("Blast Text to Channel")) {
 			return;
 		}
@@ -706,7 +720,7 @@ function CRunBluewing_Client() {
 		/// <param name="textToBlast" type="String"> Text to blast. Can be blank. </param>
 		subChannel = ~~subChannel;
 		if (!this.Check_Subchannel(subChannel, "Blast Text to Peer") ||
-			!this.Check_TextMsgValue(textToBlast, "Blast Text to Peer") ||
+			!this.Check_TextMsgValue(textToBlast, "Blast Text to Peer", true) ||
 			!this.Check_PeerSelection("Blast Text to Peer")) {
 			return;
 		}
@@ -907,7 +921,8 @@ function CRunBluewing_Client() {
 		/// <param name="subChannel" type="Number"> An 8-bit unsigned number, 0-255. </param>
 		subChannel = ~~subChannel;
 		if (!this.Check_Subchannel(subChannel, "Blast Binary to Server") ||
-			!this.Check_UnlockedSendMsg("Blast Binary to Server")) {
+			!this.Check_UnlockedSendMsg("Blast Binary to Server") ||
+			!this.Check_BinaryUDPSized("Blast Binary to Server")) {
 			return;
 		}
 		this.globals.client.BlastMsg(subChannel, this.globals.sendMsg, 2);
@@ -919,7 +934,8 @@ function CRunBluewing_Client() {
 		subChannel = ~~subChannel;
 		if (!this.Check_Subchannel(subChannel, "Blast Binary to Channel") ||
 			!this.Check_ChannelSelection("Blast Binary to Channel") ||
-			!this.Check_UnlockedSendMsg("Blast Binary to Server")) {
+			!this.Check_UnlockedSendMsg("Blast Binary to Channel") ||
+			!this.Check_BinaryUDPSized("Blast Binary to Channel")) {
 			return;
 		}
 		this.selChannel.BlastMsg(subChannel, this.globals.sendMsg, 2);
@@ -931,7 +947,8 @@ function CRunBluewing_Client() {
 		subChannel = ~~subChannel;
 		if (!this.Check_Subchannel(subChannel, "Blast Binary to Peer") ||
 			!this.Check_PeerSelection("Blast Binary to Peer") ||
-			!this.Check_UnlockedSendMsg("Blast Binary to Peer")) {
+			!this.Check_UnlockedSendMsg("Blast Binary to Peer") ||
+			!this.Check_BinaryUDPSized("Blast Binary to Peer")) {
 			return;
 		}
 		this.selPeer.BlastMsg(subChannel, this.globals.sendMsg, 2);
@@ -1043,7 +1060,7 @@ function CRunBluewing_Client() {
 		}
 		else {
 			view.setUint32(this.globals.sendMsg.byteLength, i, true);
-		}	
+		}
 		this.globals.sendMsg = newMsg;
 	};
 	this.Action_AddFloat = function (theFloat) {
@@ -1365,6 +1382,12 @@ function CRunBluewing_Client() {
 			return this.CreateError("Invalid setting passed to SetDestroySetting, expecting 0 or 1.");
 		}
 		this.globals.fullDeleteEnabled = enabled != 0;
+	};
+	this.Action_SetLocalPortForHolePunch = function (port) {
+		if (port < 1 || port > 0xFFFF) {
+			return this.CreateError("Invalid port passed to SetLocalPortForHolePunch, expecting 1 through 65535, got " + port + ".");
+		}
+		this.CreateError("Setting local port is not available in HTML5.");
 	};
 
 	// ======================================================================================================
@@ -2349,7 +2372,8 @@ function CRunBluewing_Client() {
 	/* 73 */ this.Action_Connect,
 	/* 74 */ this.Action_ResizeBinaryToSend,
 	// Blue-only actions
-	/* 75 */ this.Action_SetDestroySetting
+	/* 75 */ this.Action_SetDestroySetting,
+	/* 76 */ this.Action_SetLocalPortForHolePunch
 	];
 	this.$conditionFuncs = [
 	/* 0 */ this.Condition_MandatoryTriggeredEvent, /* OnError */
@@ -2914,6 +2938,10 @@ function BluewingClient_GlobalInfo(ext, edPtr) {
 	// Used to determine if an error event happened in a Fusion event, e.g. user put in bad parameter.
 	// Fusion code always runs in main thread, but errors can occur outside of user input.
 	this.mainThreadID = 0;
+	// Max size of a UDP message - good values are 1400 bytes for Ethernet MTU,
+	// and 576 bytes for minimum IPv4 packet transmissible without fragmentation.
+	// Another size of note is a bit under 16KiB, due to SSL record size + Lacewing headers.
+	this.maxUDPSize = this.client.relay_max_udp_payload;
 
 	// Due to Runtime.WriteGlobal() not working if there's no Extension,
 	// or not working mid-frame transition, we'll have to just fake its deletion,
@@ -3209,6 +3237,12 @@ function Bluewing_Client(blue) {
 	impl2.set([10 << 4], 0);
 	impl2.set(implStr, 1);
 
+	// Maximum size of a UDP datagram is 65535, minus IP(v4/v6) header, minus Lacewing Relay UDP header,
+	// with some extra margin, due to WebSocket psuedo.
+	// It's probably fragmented beyond 1400 bytes anyway, due to Ethernet MTU.
+	// UDP exceeding this size will be silently dropped.
+	this.relay_max_udp_payload = 0xFFFF - 40 - 20;
+
 	this.OnDisconnect = function () {
 		/// <summary> Called when the server disconnects or fails to connect. </summary>
 
@@ -3223,7 +3257,7 @@ function Bluewing_Client(blue) {
 			}
 			// Edge case where we get WebSocket OK, but no Lacewing response
 			else if (this.isConnected) {
-				this.ext.LacewingCall_OnConnectDenied(this, "Got a WebSocket connection, but couldn't use Bluewing.");	
+				this.ext.LacewingCall_OnConnectDenied(this, "Got a WebSocket connection, but couldn't use Bluewing.");
 			}
 			//else we never connected anyway; but a connection failed error should've been made in handleEvent() already
 			//	this.ext.LacewingCall_OnError(this, "Failed to connect to WebSocket server.");
@@ -3342,7 +3376,7 @@ function Bluewing_Client(blue) {
 		///		Protocol is indicated by the room aka namespace. </param>
 		/// <param name="rawMsg" type="ArrayBuffer"> The full message, including all headers. </param>
 		const fullMsg = new DataView(rawMsg);
-		
+
 		if (fullMsg.byteLength < 1) {
 			this.CreateError("Received a useless zero-length message. Server may be broken.");
 			return;
@@ -3391,7 +3425,7 @@ function Bluewing_Client(blue) {
 							else {
 								this.welcomeMessage = this.decoder.decode(rawMsg.slice(5));
 							}
-							
+
 							// Might as well send implementation without the server asking; impl was added to Blue Server
 							// before WebSocket was
 							this.comm.send(this.impl);
@@ -3644,7 +3678,7 @@ function Bluewing_Client(blue) {
 				const peerName = rawMsg.byteLength == 5 ? "" : this.decoder.decode(rawMsg.slice(6));
 				const flags2 = rawMsg.byteLength == 5 ? 0 : fullMsg.getUint8(5);
 
-				if (flags2 & 0xFE != 0) {
+				if ((flags2 & 0xFE) != 0) {
 					this.CreateError("Unexpected flags in 'peer2 change message'; expected 0 or 1, got " + flags2);
 					return;
 				}
@@ -3960,6 +3994,10 @@ function Bluewing_Client(blue) {
 		catch (e) { }
 	};
 	this.$SendRawUDP = function (msg) {
+		if (msg.byteLength > this.relay_max_udp_payload) {
+			console.debug("UDP message too large, discarded");
+			return;
+		}
 		const temp = new Uint8Array(msg, 0, 1);
 		temp.set([temp[0] | 0x8], 0);
 		try { this.comm.send(msg); }

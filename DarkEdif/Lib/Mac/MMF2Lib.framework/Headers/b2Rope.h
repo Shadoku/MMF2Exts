@@ -16,7 +16,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#pragma once
 #ifndef B2_ROPE_H
 #define B2_ROPE_H
 
@@ -24,7 +23,7 @@
 
 class b2Draw;
 
-/// 
+///
 struct b2RopeDef
 {
 	b2RopeDef()
@@ -60,7 +59,7 @@ struct b2RopeDef
 	float32 k3;
 };
 
-/// 
+///
 class b2Rope
 {
 public:

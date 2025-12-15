@@ -16,7 +16,6 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#pragma once
 #ifndef B2_WORLD_H
 #define B2_WORLD_H
 
@@ -55,7 +54,7 @@ public:
 
 	/// Register a contact filter to provide specific control over collision.
 	/// Otherwise the default filter is used (b2_defaultFilter). The listener is
-	/// owned by you and must remain in scope. 
+	/// owned by you and must remain in scope.
 	void SetContactFilter(b2ContactFilter* filter);
 
 	/// Register a contact event listener. The listener is owned by you and must
