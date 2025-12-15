@@ -14,6 +14,7 @@
 #pragma comment(lib, "mpr.lib")
 #pragma comment(lib, "secur32.lib")
 #pragma comment(lib, "crypt32.lib")
+#pragma comment(lib, "Iphlpapi.lib")
 #endif
 
 #ifndef _lacewing_static
@@ -36,8 +37,9 @@
 
 #include "MultiThreading.hpp"
 
-// edPtr : Used at edittime and saved in the MFA/CCN/EXE files
-struct EDITDATA
+#pragma pack (push, 1)
+// Binary block used in Fusion editor and saved in the MFA/CCN/EXE files
+struct EDITDATA final
 {
 	NO_DEFAULT_CTORS_OR_DTORS(EDITDATA);
 	// Header - required, must be first variable in EDITDATA
@@ -56,10 +58,12 @@ struct EDITDATA
 	char edGlobalID[255];
 	bool timeoutWarningEnabled;
 	bool fullDeleteEnabled;
-	char pad1[256];
-
-	// Note: To match Lacewing Relay Client, this struct's size must be 544 bytes.
-	// NOPROPS is used to manually set the size of this struct and access properties in it.
+	char pad1[259];
 };
+#pragma pack (pop)
+// MMF2 version of Lacewing Relay Client #20 was version 5, EDITDATA size 544.
+// To match Lacewing Relay Client, this struct's size must be 544 bytes.
+// NOPROPS is used to manually set the size of this struct and access properties in it.
+static_assert(sizeof(EDITDATA) == 544);
 
 #include "Extension.hpp"

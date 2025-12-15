@@ -107,7 +107,7 @@
 
         /* end: returns an Iterator one element after the end of the Array
          */
-        inline Iterator end () 
+        inline Iterator end ()
         {
             return Iterator (this, numElements);
         }

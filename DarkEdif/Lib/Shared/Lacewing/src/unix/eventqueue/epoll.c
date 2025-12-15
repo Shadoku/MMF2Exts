@@ -1,11 +1,11 @@
 /* vim: set noet ts=4 sw=4 sts=4 ft=c:
  *
  * Copyright (C) 2013 James McLaughlin.
- * Copyright (C) 2012-2022 Darkwire Software.
+ * Copyright (C) 2012-2025 Darkwire Software.
  * All rights reserved.
  *
  * liblacewing and Lacewing Relay/Blue source code are available under MIT license.
- * https://opensource.org/licenses/mit-license.php
+ * https://opensource.org/license/mit
 */
 
 #include "../../common.h"
@@ -14,6 +14,9 @@
 lwp_eventqueue lwp_eventqueue_new ()
 {
 	lwp_eventqueue queue = (lwp_eventqueue)malloc(sizeof(_lw_eventqueue));
+	if (!queue)
+		return NULL;
+
 	queue->epollFD = epoll_create (32);
 	queue->numFDsWatched = 0;
 	return queue;

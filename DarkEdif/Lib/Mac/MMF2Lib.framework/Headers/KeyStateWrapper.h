@@ -6,7 +6,6 @@
 //  Copyright 2011 Clickteam. All rights reserved.
 //
 
-#pragma once
 #import <Cocoa/Cocoa.h>
 @class CRunApp;
 

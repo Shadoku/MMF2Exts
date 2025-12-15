@@ -2,11 +2,11 @@
 *
 * This source code is part of the iOS exporter for Clickteam Multimedia Fusion 2
 * and Clickteam Fusion 2.5.
-* 
-* Permission is hereby granted to any person obtaining a legal copy 
-* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source 
-* code for debugging, optimizing, or customizing applications created with 
-* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5. 
+*
+* Permission is hereby granted to any person obtaining a legal copy
+* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source
+* code for debugging, optimizing, or customizing applications created with
+* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5.
 * Any other use of this source code is prohibited.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -22,7 +22,7 @@
 // CIMAGE Une image
 //
 //----------------------------------------------------------------------------------
-#pragma once
+#define GL_SILENCE_DEPRECATION
 #import <Foundation/Foundation.h>
 #import <OpenGL/OpenGL.h>
 #import "IDrawable.h"
@@ -59,7 +59,7 @@ struct PixelRGBA5551{
 	unsigned red	: 5;
 	unsigned green	: 5;
 	unsigned blue	: 5;
-	unsigned alpha	: 1;	
+	unsigned alpha	: 1;
 };
 struct PixelRGB565{
 	unsigned red	: 5;
@@ -76,6 +76,8 @@ union PixelGlobal{
 };
 #pragma pack(pop)
 
+static const int JPEG = 5;
+
 struct ImageInfo
 {
 	BOOL isFound;
@@ -90,7 +92,7 @@ typedef struct ImageInfo ImageInfo;
 
 @interface CImage : CTexture
 {
-@public 
+@public
 	CRunApp* app;
 
     short xSpot;
@@ -104,13 +106,13 @@ typedef struct ImageInfo ImageInfo;
 
     #define IMGFLAG_REPLACEDCOLORS  0x1000  // Volatil flag used by replaceColor action
 
-	short format;
+//	short format; // is now in CTexture
 	short flags;
 	short bytesPrPixel;
 	int openGLmode;
 	int openGLformat;
 
-	unsigned int* data;
+	__strong unsigned int* data;
 	NSUInteger dataLength;
     CMask* mask;
     CMask* maskPlatform;
@@ -121,6 +123,7 @@ typedef struct ImageInfo ImageInfo;
 	NSUInteger offset;
 	CFile* file;
 	BOOL isUploading;
+    BOOL opaqueMask;
 }
 -(id)initWithApp:(CRunApp*)a;
 -(id)initWithWidth:(int)sx andHeight:(int)sy;
@@ -130,6 +133,7 @@ typedef struct ImageInfo ImageInfo;
 -(void)preload:(CFile*)file;
 -(CMask*)getMask:(int)nFlags withAngle:(float)angle andScaleX:(double)scaleX andScaleY:(double)scaleY;
 -(CMask*)getMask:(int)nFlags;
+-(void)setOpaqueMask:(BOOL)_opaqueMask;
 -(void)copyImage:(CImage*)image;
 -(CGImageRef)getCGImage;
 -(NSImage*)getNSImage;
@@ -176,6 +180,7 @@ static inline bool pixelIsSolid(CImage* img, int x, int y)
 	switch (img->format)
 	{
 		case RGBA8888:
+        case JPEG:
 			pixel4 = img->data[x+ y*img->width];
 			return ((pixel4 & 0xFF000000) != 0);
 		case RGBA4444:
@@ -183,7 +188,7 @@ static inline bool pixelIsSolid(CImage* img, int x, int y)
 			return ((pixel2 & 0xF) != 0);
 		case RGBA5551:
 			pixel2 = *(short*)((char*)img->data + img->bLineWidth*y + x*img->bytesPrPixel);
-			return ((pixel2 & 0x01) != 0);			
+			return ((pixel2 & 0x01) != 0);
 		case RGB888:
 		case RGB565:
 		default:
