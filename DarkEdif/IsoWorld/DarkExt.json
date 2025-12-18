@@ -1,0 +1,418 @@
+{
+	"Identifier": "ISOW",
+	"Dependencies": "",
+	"UK English": {
+		"About": {
+			"Name": "IsoWorld",
+			"Author": "Fusion Community",
+			"Comment": "Isometric map ingestion and collision helpers for Tiled TMX content.",
+			"Copyright": "Copyright © 2024",
+			"Help": "Help/IsoWorld.chm",
+			"URL": "https://github.com/SortaCore/MMF2Exts"
+		},
+		"ActionMenu": [
+			[0, "Load TMX"],
+			[1, "Load JSON cache"],
+			[2, "Save JSON cache"],
+			[3, "Export TMX layer snapshot"],
+			[4, "Set tile heights"],
+			[5, "Set tile mask"],
+			[6, "Move body"],
+			[7, "Teleport if clear"],
+			[8, "Clear chunk cache"],
+			[9, "Spawn bodies from layer"],
+			[10, "Enable CCD"],
+			[11, "Set body physics"],
+			[12, "Toggle debug overlay"]
+		],
+		"ConditionMenu": [
+			[0, "On TMX load success"],
+			[1, "On TMX load failure"],
+			[2, "On collision start"],
+			[3, "On collision end"],
+			[4, "On clear path"],
+			[5, "On landing"],
+			[6, "On leaving ground"],
+			[7, "Tile type in region?"]
+		],
+		"ExpressionMenu": [
+			[0, "World→Screen X"],
+			[1, "World→Screen Y"],
+			[2, "Screen→Tile Q"],
+			[3, "Screen→Tile R"],
+			[4, "Tile height at"],
+			[5, "Surface normal X"],
+			[6, "Surface normal Y"],
+			[7, "Surface normal Z"],
+			[8, "Raycast distance"],
+			[9, "Depth sort key"],
+			[10, "Body contact flags"],
+			[11, "Tile property$"],
+			[12, "Tileset property$"],
+			[13, "Layer parallax X"],
+			[14, "Layer parallax Y"],
+			[15, "Body X"],
+			[16, "Body Y"],
+			[17, "Body Z"]
+		],
+		"Actions": [
+			{
+				"Title": "Load TMX from file %0",
+				"Parameters": [
+					["Filename", "TMX file"]
+				]
+			},
+			{
+				"Title": "Load JSON cache %0",
+				"Parameters": [
+					["Filename", "Cache file"]
+				]
+			},
+			{
+				"Title": "Save JSON cache to %0",
+				"Parameters": [
+					["Filename", "Cache file"]
+				]
+			},
+			{
+				"Title": "Export TMX layer %1 to %0",
+				"Parameters": [
+					["Filename", "Destination TMX"],
+					["Editbox String", "Layer name"]
+				]
+			},
+			{
+				"Title": "Set heights for layer %0 at (%1,%2) to %3,%4,%5,%6",
+				"Parameters": [
+					["Editbox String", "Layer"],
+					["Integer", "Tile X"],
+					["Integer", "Tile Y"],
+					["Integer", "Top-left height"],
+					["Integer", "Top-right height"],
+					["Integer", "Bottom-left height"],
+					["Integer", "Bottom-right height"]
+				]
+			},
+			{
+				"Title": "Set collision mask for layer %0 at (%1,%2) to %3",
+				"Parameters": [
+					["Editbox String", "Layer"],
+					["Integer", "Tile X"],
+					["Integer", "Tile Y"],
+					["Integer", "Mask ID"]
+				]
+			},
+			{
+				"Title": "Move body %0 by (%1,%2,%3)",
+				"Parameters": [
+					["Editbox String", "Body name"],
+					["Float", "dx"],
+					["Float", "dy"],
+					["Float", "dz"]
+				]
+			},
+			{
+				"Title": "Teleport body %0 to (%1,%2,%3) if clear",
+				"Parameters": [
+					["Editbox String", "Body name"],
+					["Float", "X"],
+					["Float", "Y"],
+					["Float", "Z"]
+				]
+			},
+			{
+				"Title": "Clear loaded map and caches"
+			},
+			{
+				"Title": "Spawn bodies from object layer %0",
+				"Parameters": [
+					["Editbox String", "Layer name"]
+				]
+			},
+			{
+				"Title": "Enable continuous collision detection for %0? %1",
+				"Parameters": [
+					["Editbox String", "Body name"],
+					["Checkbox", "Enabled"]
+				]
+			},
+			{
+				"Title": "Set physics defaults for %0 (gravity %1, friction %2, bounce %3)",
+				"Parameters": [
+					["Editbox String", "Body name (blank = global)"],
+					["Float", "Gravity"],
+					["Float", "Friction"],
+					["Float", "Bounce"]
+				]
+			},
+			{
+				"Title": "Enable debug overlay? %0",
+				"Parameters": [
+					["Checkbox", "Enabled"]
+				]
+			}
+		],
+		"Conditions": [
+			{
+				"Title": "On TMX load success",
+				"Triggered": true
+			},
+			{
+				"Title": "On TMX load failure",
+				"Triggered": true
+			},
+			{
+				"Title": "On collision start for %0",
+				"Triggered": true,
+				"Parameters": [
+					["Editbox String", "Body name (blank=any)"]
+				]
+			},
+			{
+				"Title": "On collision end for %0",
+				"Triggered": true,
+				"Parameters": [
+					["Editbox String", "Body name (blank=any)"]
+				]
+			},
+			{
+				"Title": "On clear path for %0",
+				"Triggered": true,
+				"Parameters": [
+					["Editbox String", "Body name (blank=any)"]
+				]
+			},
+			{
+				"Title": "On landing for %0",
+				"Triggered": true,
+				"Parameters": [
+					["Editbox String", "Body name"]
+				]
+			},
+			{
+				"Title": "On leaving ground for %0",
+				"Triggered": true,
+				"Parameters": [
+					["Editbox String", "Body name"]
+				]
+			},
+			{
+				"Title": "Does layer %0 contain terrain %1 in region (%2,%3)→(%4,%5)?",
+				"Triggered": false,
+				"Parameters": [
+					["Editbox String", "Layer name"],
+					["Editbox String", "Terrain/Type"],
+					["Integer", "Start X"],
+					["Integer", "Start Y"],
+					["Integer", "End X"],
+					["Integer", "End Y"]
+				]
+			}
+		],
+		"Expressions": [
+			{
+				"Title": "WorldToScreenX(",
+				"Returns": "Float",
+				"Parameters": [
+					["Float", "World X"],
+					["Float", "World Y"],
+					["Float", "World Z"]
+				]
+			},
+			{
+				"Title": "WorldToScreenY(",
+				"Returns": "Float",
+				"Parameters": [
+					["Float", "World X"],
+					["Float", "World Y"],
+					["Float", "World Z"]
+				]
+			},
+			{
+				"Title": "ScreenToTileQ(",
+				"Returns": "Integer",
+				"Parameters": [
+					["Float", "Screen X"],
+					["Float", "Screen Y"]
+				]
+			},
+			{
+				"Title": "ScreenToTileR(",
+				"Returns": "Integer",
+				"Parameters": [
+					["Float", "Screen X"],
+					["Float", "Screen Y"]
+				]
+			},
+			{
+				"Title": "TileHeightAt(",
+				"Returns": "Float",
+				"Parameters": [
+					["Editbox String", "Layer name"],
+					["Integer", "Tile X"],
+					["Integer", "Tile Y"]
+				]
+			},
+			{
+				"Title": "SurfaceNormalX(",
+				"Returns": "Float",
+				"Parameters": [
+					["Editbox String", "Layer name"],
+					["Integer", "Tile X"],
+					["Integer", "Tile Y"]
+				]
+			},
+			{
+				"Title": "SurfaceNormalY(",
+				"Returns": "Float",
+				"Parameters": [
+					["Editbox String", "Layer name"],
+					["Integer", "Tile X"],
+					["Integer", "Tile Y"]
+				]
+			},
+			{
+				"Title": "SurfaceNormalZ(",
+				"Returns": "Float",
+				"Parameters": [
+					["Editbox String", "Layer name"],
+					["Integer", "Tile X"],
+					["Integer", "Tile Y"]
+				]
+			},
+			{
+				"Title": "RaycastDistance(",
+				"Returns": "Float",
+				"Parameters": [
+					["Float", "Start X"],
+					["Float", "Start Y"],
+					["Float", "Start Z"],
+					["Float", "End X"],
+					["Float", "End Y"],
+					["Float", "End Z"]
+				]
+			},
+			{
+				"Title": "DepthSortKey(",
+				"Returns": "Float",
+				"Parameters": [
+					["Float", "Screen X"],
+					["Float", "Screen Y"],
+					["Float", "Z"]
+				]
+			},
+			{
+				"Title": "BodyContactFlags(",
+				"Returns": "Integer",
+				"Parameters": [
+					["Editbox String", "Body name"]
+				]
+			},
+			{
+				"Title": "TileProperty$(",
+				"Returns": "Text",
+				"Parameters": [
+					["Editbox String", "Layer name"],
+					["Integer", "Tile X"],
+					["Integer", "Tile Y"],
+					["Editbox String", "Property"]
+				]
+			},
+			{
+				"Title": "TilesetProperty$(",
+				"Returns": "Text",
+				"Parameters": [
+					["Integer", "GID"],
+					["Editbox String", "Property"]
+				]
+			},
+			{
+				"Title": "LayerParallaxX(",
+				"Returns": "Float",
+				"Parameters": [
+					["Editbox String", "Layer name"]
+				]
+			},
+			{
+				"Title": "LayerParallaxY(",
+				"Returns": "Float",
+				"Parameters": [
+					["Editbox String", "Layer name"]
+				]
+			},
+			{
+				"Title": "BodyX(",
+				"Returns": "Float",
+				"Parameters": [
+					["Editbox String", "Body name"]
+				]
+			},
+			{
+				"Title": "BodyY(",
+				"Returns": "Float",
+				"Parameters": [
+					["Editbox String", "Body name"]
+				]
+			},
+			{
+				"Title": "BodyZ(",
+				"Returns": "Float",
+				"Parameters": [
+					["Editbox String", "Body name"]
+				]
+			}
+		],
+		"Properties": [
+			{
+				"Title": "Map defaults",
+				"Type": "Folder"
+			},
+			{
+				"Title": "Tile Width",
+				"Info": "Tile width in pixels",
+				"Type": "Editbox Number",
+				"DefaultState": 64
+			},
+			{
+				"Title": "Tile Height",
+				"Info": "Tile height in pixels",
+				"Type": "Editbox Number",
+				"DefaultState": 32
+			},
+			{
+				"Title": "Chunk Width",
+				"Info": "Chunk width in tiles (used for caches)",
+				"Type": "Editbox Number",
+				"DefaultState": 16
+			},
+			{
+				"Title": "Chunk Height",
+				"Info": "Chunk height in tiles (used for caches)",
+				"Type": "Editbox Number",
+				"DefaultState": 16
+			},
+			{
+				"Title": "Origin X",
+				"Info": "Screen-space origin offset X",
+				"Type": "Editbox Number",
+				"DefaultState": 0
+			},
+			{
+				"Title": "Origin Y",
+				"Info": "Screen-space origin offset Y",
+				"Type": "Editbox Number",
+				"DefaultState": 0
+			},
+			{
+				"Title": "Projection",
+				"Info": "Projection mode for coordinate conversion",
+				"Type": "Combo Box",
+				"List": ["orthogonal", "isometric", "staggered", "hexagonal"],
+				"DefaultState": "isometric"
+			},
+			{
+				"Type": "FolderEnd"
+			}
+		]
+	}
+}
