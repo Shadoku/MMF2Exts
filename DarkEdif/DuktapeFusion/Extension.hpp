@@ -2,6 +2,7 @@
 #include "DarkEdif.hpp"
 #include "duktape/duktape.h"
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -99,12 +100,15 @@ public:
                 bool IsObjectRegistered(int fixedValue);
 
         /// Expressions
-                const TCHAR* EvalJS(const TCHAR* ExpressionText);
+        const TCHAR* EvalJS(const TCHAR* ExpressionText);
                 int NewContext();
 
         bool CacheObjectScript(int fixedValue, RunObjectMultiPlatPtr obj, int altStringIndex, bool runEveryFrame);
         bool ExecuteObjectScript(int fixedValue, ScriptInfo& info, RunObjectMultiPlatPtr obj);
         void ClearScriptReference(const ScriptInfo& info);
+        bool EnsureCurrentContext();
+        duk_context* CreateContextWithHelpers();
+        bool RebuildContext(int ctxId);
 
 
         // JS helpers for Fusion object access

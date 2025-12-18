@@ -82,6 +82,108 @@ Extension::~Extension()
                 duk_destroy_heap(ctx);
 }
 
+bool Extension::EnsureCurrentContext()
+{
+        if (currentCtx >= 0 && currentCtx < (int)contexts.size())
+                return true;
+
+        if (!contexts.empty())
+        {
+                currentCtx = 0;
+                return true;
+        }
+
+        return NewContext() >= 0;
+}
+
+duk_context* Extension::CreateContextWithHelpers()
+{
+        duk_context* ctx = duk_create_heap_default();
+        if (!ctx)
+                return nullptr;
+
+        duk_push_global_object(ctx);
+        duk_push_object(ctx);
+        duk_push_c_function(ctx, JS_ListObjects, 1);
+        duk_push_pointer(ctx, this);
+        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, "listObjects");
+        duk_push_c_function(ctx, JS_GetPosition, 1);
+        duk_push_pointer(ctx, this);
+        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, "getPos");
+        duk_push_c_function(ctx, JS_SetPosition, 3);
+        duk_push_pointer(ctx, this);
+        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, "setPos");
+        duk_push_c_function(ctx, JS_GetAltValue, 2);
+        duk_push_pointer(ctx, this);
+        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, "getAltValue");
+        duk_push_c_function(ctx, JS_SetAltValue, 3);
+        duk_push_pointer(ctx, this);
+        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, "setAltValue");
+        duk_put_prop_string(ctx, -2, "fusion");
+        duk_pop(ctx);
+
+        return ctx;
+}
+
+bool Extension::RebuildContext(int ctxId)
+{
+        if (ctxId < 0)
+                return false;
+
+        // Destroy any extra contexts so we keep one shared heap around.
+        for (size_t i = 0; i < contexts.size(); ++i)
+        {
+                if ((int)i == ctxId)
+                        continue;
+                if (contexts[i])
+                {
+                        duk_destroy_heap(contexts[i]);
+                        contexts[i] = nullptr;
+                }
+        }
+        contexts.resize((size_t)ctxId + 1, nullptr);
+
+        if (contexts[ctxId])
+                duk_destroy_heap(contexts[ctxId]);
+
+        contexts[ctxId] = CreateContextWithHelpers();
+        if (!contexts[ctxId])
+                return false;
+
+        std::vector<std::tuple<int, int, bool>> toRestore;
+        toRestore.reserve(registeredScripts.size());
+        for (auto& entry : registeredScripts)
+        {
+                toRestore.emplace_back(entry.first, entry.second.altStringIndex, entry.second.runEveryFrame);
+        }
+        registeredScripts.clear();
+
+        int previousCtx = currentCtx;
+        currentCtx = ctxId;
+        bool needsHandle = false;
+        for (auto& entry : toRestore)
+        {
+                int fixedValue = std::get<0>(entry);
+                RunObjectMultiPlatPtr obj = Runtime.RunObjPtrFromFixed(fixedValue);
+                if (!obj)
+                        continue;
+
+                needsHandle = needsHandle || std::get<2>(entry);
+                CacheObjectScript(fixedValue, obj, std::get<1>(entry), std::get<2>(entry));
+        }
+        currentCtx = previousCtx;
+
+        if (needsHandle)
+                Runtime.Rehandle();
+
+        return true;
+}
+
 
 REFLAG Extension::Handle()
 {
@@ -313,7 +415,7 @@ duk_ret_t Extension::JS_SetAltValue(duk_context* ctx)
 
 bool Extension::CacheObjectScript(int fixedValue, RunObjectMultiPlatPtr obj, int altStringIndex, bool runEveryFrame)
 {
-        if (currentCtx < 0 || currentCtx >= (int)contexts.size())
+        if (!EnsureCurrentContext())
         {
                 DarkEdif::MsgBox::Error(_T("JS Error"), _T("No active context to register script."));
                 return false;

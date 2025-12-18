@@ -2,7 +2,7 @@
 
 void Extension::RunJSScript(const TCHAR* ScriptText)
 {
-    if (currentCtx < 0 || currentCtx >= (int)contexts.size())
+    if (!EnsureCurrentContext())
         return;
     std::string utf8 = DarkEdif::TStringToUTF8(ScriptText);
     if (duk_peval_string(contexts[currentCtx], utf8.c_str()) != 0) {
@@ -15,6 +15,8 @@ void Extension::RunJSScript(const TCHAR* ScriptText)
 void Extension::SetContext(int ctxId)
 {
     if(ctxId>=0 && ctxId<(int)contexts.size()) currentCtx = ctxId;
+    else if (!contexts.empty()) currentCtx = 0;
+    else EnsureCurrentContext();
 }
 
 void Extension::RegisterObjectScript(int fixedValue, int altStringIndex, int runEveryFrame)
