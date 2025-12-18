@@ -1,5 +1,7 @@
 #pragma once
 #include "DarkEdif.hpp"
+#include "duktape.h"
+#include <memory>
 
 class Extension final
 {
@@ -42,73 +44,89 @@ public:
 	// Extension data
 	// ======================================
 
-	// To add items to the Fusion Debugger, just uncomment this line.
 	DarkEdif::FusionDebugger FusionDebugger;
-	// After enabling it, you run FusionDebugger.AddItemToDebugger() inside Extension's constructor
-	// As an example:
-	std::tstring exampleDebuggerTextItem;
 
-
-	/*  Add any data you want to store in your extension to this class
-		(eg. what you'd normally store in rdPtr in old SDKs).
-
-		Unlike rdPtr, you can store real C++ objects with constructors
-		and destructors, without having to call them manually or store
-		a pointer.
-	*/
-
-	// int MyVariable;
-
-
-	/*  Add your actions, conditions and expressions as real class member
-		functions here. The arguments (and return type for expressions) must
-		match EXACTLY what you defined in the JSON.
-
-		Remember to link the actions, conditions and expressions to their
-		numeric IDs in the class constructor (Extension.cpp)
-	*/
+	// Persistent scripting state
+	using DukContextPtr = std::unique_ptr<duk_context, decltype(&duk_destroy_heap)>;
+	DukContextPtr dukCtx { nullptr, &duk_destroy_heap };
+	bool pendingErrorEvent = false;
+	bool classSyntaxSupported = false;
+	bool exposeMMFIOnStart = true;
+	bool probeClassesOnStart = true;
+	std::tstring bootstrapCode;
+        std::tstring lastError;
+        std::tstring lastResultText;
+        double lastResultNumber = 0.0;
+        bool hasNumericResult = false;
+        bool lastResultBoolean = false;
+        enum class ResultKind
+        {
+                None = 0,
+                Number,
+                Boolean,
+                String
+        };
+        ResultKind lastResultKind = ResultKind::None;
 
 	// Actions
-
-	void ActionExample(int ExampleParameter);
-	void SecondActionExample();
+	void ResetContext();
+	void RunJavaScript(const TCHAR * code);
+	void CallFunctionExpression(const TCHAR * callText);
+        void RebuildMMFI();
+        void ProbeClasses();
 
 	// Conditions
-
-	bool AreTwoNumbersEqual(int FirstNumber, int SecondNumber);
+	bool OnJavaScriptError();
 
 	// Expressions
+	const TCHAR * LastResult();
+	double LastNumber();
+        const TCHAR * LastError();
+        int ClassSupport();
+        int CurrentFrameIndex();
+        int ObjectCount();
+        int LastResultType();
+        int LastBoolean();
 
-	int Add(int FirstNumber, int SecondNumber);
-	const TCHAR * HelloWorld();
-
-	// Runs every tick of Fusion's runtime, can be toggled off and back on
 	REFLAG Handle();
 
-#if TEXT_OEFLAG_EXTENSION
-	// Extension text struct. Required for text exts.
-	DarkEdif::FontInfoMultiPlat font;
-	void OnFontChanged(bool colorEdit, DarkEdif::Rect* rc);
-#endif
-#if DARKEDIF_DISPLAY_TYPE == DARKEDIF_DISPLAY_SIMPLE
-	// Extension display surface ptr. Required for simple display exts.
-	DarkEdif::Surface * surf = nullptr;
-#elif DARKEDIF_DISPLAY_TYPE == DARKEDIF_DISPLAY_MANUAL
-	void Display();
-	void GetZoneInfos();
-	DarkEdif::Surface * GetDisplaySurface();
-	DarkEdif::CollisionMask * GetCollisionMask(std::uint32_t flags);
-#endif
-
-	// These are called if there's no function linked to an ID
 	void UnlinkedAction(int ID);
 	long UnlinkedCondition(int ID);
 	long UnlinkedExpression(int ID);
 
-#if PAUSABLE_EXTENSION
-	// Called when Fusion runtime is pausing - not just the F3 pause dialog
-	void FusionRuntimePaused();
-	// Called when Fusion runtime is resuming after a pause
-	void FusionRuntimeContinued();
-#endif // PAUSABLE_EXTENSION
+	void InitialiseContext();
+        void RegisterMMFIHelpers();
+        bool EvalJavaScript(const std::tstring_view code, bool triggerEvents = true);
+        void RecordError(const std::tstring & message, bool triggerEvents);
+        void ProbeClassSupport();
+        static Extension * FromCtx(duk_context * ctx);
+        static duk_ret_t DukRuntimeCurrentFrame(duk_context * ctx);
+        static duk_ret_t DukRuntimeObjectCount(duk_context * ctx);
+        static duk_ret_t DukRuntimeTriggerEvent(duk_context * ctx);
+        static duk_ret_t DukFrameXLeft(duk_context * ctx);
+        static duk_ret_t DukFrameXRight(duk_context * ctx);
+        static duk_ret_t DukFrameYTop(duk_context * ctx);
+        static duk_ret_t DukFrameYBottom(duk_context * ctx);
+        static duk_ret_t DukFrameWidth(duk_context * ctx);
+        static duk_ret_t DukFrameHeight(duk_context * ctx);
+        static duk_ret_t DukFrameVirtualWidth(duk_context * ctx);
+        static duk_ret_t DukFrameVirtualHeight(duk_context * ctx);
+        static duk_ret_t DukFrameTestPoint(duk_context * ctx);
+        static duk_ret_t DukFrameTestRect(duk_context * ctx);
+        static duk_ret_t DukKeyboardKeyDown(duk_context * ctx);
+        static duk_ret_t DukKeyboardKeyUp(duk_context * ctx);
+        static duk_ret_t DukMouseX(duk_context * ctx);
+        static duk_ret_t DukMouseY(duk_context * ctx);
+        static duk_ret_t DukMouseClientX(duk_context * ctx);
+        static duk_ret_t DukMouseClientY(duk_context * ctx);
+        static duk_ret_t DukMouseWheelDelta(duk_context * ctx);
+        static duk_ret_t DukMouseButtonDown(duk_context * ctx);
+        static duk_ret_t DukMouseButtonUp(duk_context * ctx);
+        static duk_ret_t DukWindowWidth(duk_context * ctx);
+        static duk_ret_t DukWindowHeight(duk_context * ctx);
+        static duk_ret_t DukWindowClientWidth(duk_context * ctx);
+        static duk_ret_t DukWindowClientHeight(duk_context * ctx);
+        static duk_ret_t DukWindowFrameWidth(duk_context * ctx);
+        static duk_ret_t DukWindowFrameHeight(duk_context * ctx);
+        static duk_ret_t DukMMFIUnsupported(duk_context * ctx);
 };

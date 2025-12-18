@@ -1,268 +1,332 @@
-﻿{
-	// 4-character identifer that uniquely identifies your extension.
-	// Can be letters, numbers, or punctuation, but must be 4 ASCII characters.
-	"Identifier": "EXMP",
-	"Dependencies": "",
-	"UK English": {
-		"About": {
-			"Name": "DarkEdif Template",
-			"Author": "Your Name",
-			"Comment": "A sentence or two to describe your extension",
-			"Copyright": "Copyright \u00A9 2025 by Your Name",
-			"Help": "Help/Example.chm",
-			"URL": "https://www.example.com/"
-		},
-		"ActionMenu": [
-			[ 0, "Action Example" ],
-			"---",
-			[ "Sub Menu",
-				[ 1, "Second Action Example" ]
-			]
-		],
-		"ConditionMenu": [
-			[ 0, "Are two numbers equal?" ]
-		],
-		"ExpressionMenu": [
-			[ 0, "Add two numbers" ],
-			[ 1, "Hello world" ]
-		],
-		"Actions": [
-			{
-				"Title": "Action Example with parameter %0",
-				"Parameters": [
-					[ "Integer", "Example Parameter" ]
-				]
-			},
-			{
-				"Title": "Second Action Example"
-			}
-		],
-		"Conditions": [
-			{
-				"Title": "%o : Are %0 and %1 equal?",
-				"Triggered": false,
-				"Parameters": [
-					[ "Integer", "First number" ],
-					[ "Integer", "Second number" ]
-				]
-			}
-		],
-		"Expressions": [
-			{
-				"Title": "Add(",
-				"Returns": "Integer",
-				"Parameters": [
-					[ "Integer", "First number" ],
-					[ "Integer", "Second number" ]
-				]
-			},
-			{
-				"Title": "HelloWorld$(",
-				"Returns": "Text"
-			}
-		],
-		"Properties": [
-			{
-				"Title": "Folder of props",
-				"Info": "Folder information",
-				"Type": "Folder"
-			},
-			{
-				"Title": "Checkbox within folder",
-				"Info": "Should be bold text.",
-				"Type": "Checkbox",
-				"DefaultState": true, // or false
-				"Bold": true
-			},
-			{
-				"Type": "FolderEnd"
-			},
-			{
-				"Title": "Static text 1",
-				"Info": "Blank text",
-				"Type": "Text",
-				"DefaultState": "Static text, default state. Or default text."
-			},
-			{
-				"Title": "Static text 2",
-				"Info": "Blank text, bold",
-				"Type": "Text",
-				"DefaultState": "Bolded static text",
-				"Bold": true
-			},
-			{
-				"Title": "Editable 3",
-				"Info": "Shouldn't be bold.",
-				"Type": "Edit button",
-				"DefaultState": "Button text"
-			},
-			{
-				"Title": "Editable 4",
-				"Info": "Fusion ignores the bold setting.",
-				"Type": "Edit button",
-				"DefaultState": "Bolded button text",
-				"Bold": true
-			},
-			{
-				"Title": "Editable 5",
-				"Info": "Still set to bold, and bold is ignored.",
-				"DefaultState": "Default text",
-				"Type": "Editbox String",
-				"Bold": true
-			},
-			{
-				"Title": "Editable 6",
-				"Info": "Force uppercase on the input text.",
-				"Type": "Editbox String",
-				"DefaultState": "Default text, made uppercase",
-				"Case": "Upper"
-			},
-			{
-				"Title": "Editable 7",
-				"Info": "This one should be limited to 25 characters.",
-				"Type": "Editbox String",
-				"DefaultState": "Default text, made lowercase",
-				"Case": "Lower",
-				"MaxLength": 25
-			},
-			{
-				"Title": "Editable 8",
-				"Info": "Number limited between 20 and 25",
-				"Type": "Editbox Number",
-				"DefaultState": 21,
-				"Minimum": 20,
-				"Maximum": 25
-			}
-		]
-	},
-	"French": {
-		"About": {
-			"Name": "Exemple objet",
-			"Author": "Votre Nom",
-			"Copyright": "Copyright \u00A9 2022 par Votre Nom",
-			"Comment": "Une ou deux phrases pour décrire votre poste",
-			"Help": "Help/Example.chm",
-			"URL": "http://www.example.com/"
-		},
-		"ActionMenu": [
-			[ 0, "Exemple d'action" ],
-			"---",
-			[ "Sub Menu",
-				[ 1, "Exemple deuxième action" ]
-			]
-		],
-		"ConditionMenu": [
-			[ 0, "Sont deux nombres égaux?" ]
-		],
-		"ExpressionMenu": [
-			[ 0, "Ajouter deux nombres" ],
-			[ 1, "Bonjour monde" ]
-		],
-		"Actions": [
-			{
-				"Title": "Exemple d'action avec le paramètre %0",
-				"Parameters": [
-					[ "Integer", "Paramètre exemple" ]
-				]
-			},
-			{
-				"Title": "Exemple deuxième action"
-			}
-		],
-		"Conditions": [
-			{
-				"Title": "%o : Sont de %0 et %1 égale?",
-				"Triggered": false,
-				"Parameters": [
-					[ "Integer", "Premier numéro" ],
-					[ "Integer", "Deuxième numéro" ]
-				]
-			}
-		],
-		"Expressions": [
-			{
-				"Title": "Adherer(",
-				"Returns": "Integer",
-				"Parameters": [
-					[ "Integer", "Premier numéro" ],
-					[ "Integer", "Deuxième numéro" ]
-				]
-			},
-			{
-				"Title": "BonjourMonde$(",
-				"Returns": "Text"
-			}
-		],
-		"Properties": [
-			{
-				"Title": "Folder",
-				"Info": "Folder d'information",
-				"Type": "Folder"
-			},
-				{
-					"Title": "Case à cocher dans le dossier",
-					"Info": "oui, il faut faire preuve d'audace.",
-					"Type": "Checkbox",
-					"Bold": true,
-					"DefaultState": true
-				},
-			{
-				"Type": "FolderEnd"
-			},
-			{
-				"Title": "Texte statique 1",
-				"Info": "Texte vide",
-				"Type": "Text"
-			},
-			{
-				"Title": "Texte statique 2",
-				"Info": "Texte vide, en caractères gras",
-				"Type": "Text",
-				"Bold": true
-			},
-			{
-				"Title": "Éditable 3",
-				"Info": "Ouais, il ne devrait pas faire preuve d'audace.",
-				"Type": "Edit button",
-				"DefaultState": "Bouton"
-			},
-			{
-				"Title": "Éditable 4",
-				"Info": "Ouais, il est très gras.",
-				"Type": "Edit button",
-				"DefaultState": "Bouton texte",
-				"Bold": true
-			},
-			{
-				"Title": "Éditable 5",
-				"Info": "Régulière chaîne de boîte d'édition.",
-				"Type": "Editbox String"
-			},
-			{
-				"Title": "Éditable 6",
-				"Info": "Celui-ci devrait obliger les majuscules.",
-				"Type": "Editbox String",
-				"Case": "Upper"
-			},
-			{
-				"Title": "Éditable 7",
-				"Info": "Celui-ci devrait être limité à 25 caractères.",
-				"Type": "Editbox String",
-				"Case": "Lower",
-				"MaxLength": 25
-			},
-			{
-				"Title": "Éditable 8",
-				"Info": "Celui-ci devrait être limité entre 20 et 25.",
-				"Type": "Editbox Number",
-				"Maximum": 25,
-				"Minimum": 20
-			}
-		]
-	}
-	/*
-	"German":
-	{},
-	"Japanese":
-	{}*/
+{
+        "Identifier": "DKJS",
+        "Dependencies": "",
+        "UK English": {
+                "About": {
+                        "Name": "Duktape MMFI",
+                        "Author": "DarkEDIF Team",
+                        "Comment": "Duktape 2.7.0 scripting with MMFI-style helpers",
+                        "Copyright": "Copyright \u00a9 2025",
+                        "Help": "",
+                        "URL": "https://duktape.org/"
+                },
+                "ActionMenu": [
+                        [
+                                0,
+                                "Reset Duktape context"
+                        ],
+                        [
+                                1,
+                                "Run JavaScript snippet"
+                        ],
+                        [
+                                2,
+                                "Call JS function expression"
+                        ],
+                        [
+                                3,
+                                "Rebuild MMFI bindings"
+                        ],
+                        [
+                                4,
+                                "Probe class support"
+                        ]
+                ],
+                "ConditionMenu": [
+                        [
+                                0,
+                                "On JavaScript error"
+                        ]
+                ],
+                "ExpressionMenu": [
+                        [
+                                0,
+                                "LastResult$"
+                        ],
+                        [
+                                1,
+                                "LastNumber"
+                        ],
+                        [
+                                2,
+                                "LastError$"
+                        ],
+                        [
+                                3,
+                                "ClassSupport"
+                        ],
+                        [
+                                4,
+                                "CurrentFrame"
+                        ],
+                        [
+                                5,
+                                "ObjectCount"
+                        ],
+                        [
+                                6,
+                                "LastResultType"
+                        ],
+                        [
+                                7,
+                                "LastBoolean"
+                        ]
+                ],
+                "Actions": [
+                        {
+                                "Title": "Reset Duktape context"
+                        },
+                        {
+                                "Title": "Run JavaScript %0",
+                                "Parameters": [
+                                        [
+                                                "Text",
+                                                "JavaScript code"
+                                        ]
+                                ]
+                        },
+                        {
+                                "Title": "Call JS function expression %0",
+                                "Parameters": [
+                                        [
+                                                "Text",
+                                                "Function call including arguments"
+                                        ]
+                                ]
+                        },
+                        {
+                                "Title": "Rebuild MMFI bindings"
+                        },
+                        {
+                                "Title": "Probe class support",
+                                "Info": "Re-run the ES6 class syntax test on demand"
+                        }
+                ],
+                "Conditions": [
+                        {
+                                "Title": "On JavaScript error",
+                                "Triggered": true
+                        }
+                ],
+                "Expressions": [
+                        {
+                                "Title": "LastResult$(",
+                                "Returns": "Text"
+                        },
+                        {
+                                "Title": "LastNumber(",
+                                "Returns": "Float"
+                        },
+                        {
+                                "Title": "LastError$(",
+                                "Returns": "Text"
+                        },
+                        {
+                                "Title": "ClassSupport(",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "CurrentFrame(",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "ObjectCount(",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "LastResultType(",
+                                "Info": "Returns 1 for number, 2 for boolean, 3 for string, 0 otherwise",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "LastBoolean(",
+                                "Info": "Returns 1 if the last result was a boolean true, 0 otherwise",
+                                "Returns": "Integer"
+                        }
+                ],
+                "Properties": [
+                        {
+                                "Title": "Bootstrap code",
+                                "Info": "JavaScript executed when the context is created",
+                                "Type": "Editbox String",
+                                "DefaultState": ""
+                        },
+                        {
+                                "Title": "Expose MMFI on start",
+                                "Info": "Automatically inject the mmf helper object into Duktape",
+                                "Type": "Checkbox",
+                                "DefaultState": true
+                        },
+                        {
+                                "Title": "Probe class support on start",
+                                "Info": "Run a small ES6 class probe after creating the context",
+                                "Type": "Checkbox",
+                                "DefaultState": true
+                        }
+                ]
+        },
+        "French": {
+                "About": {
+                        "Name": "Duktape MMFI",
+                        "Author": "DarkEDIF Team",
+                        "Copyright": "Copyright \u00a9 2025",
+                        "Comment": "Duktape 2.7.0 avec aides MMFI",
+                        "Help": "",
+                        "URL": "https://duktape.org/"
+                },
+                "ActionMenu": [
+                        [
+                                0,
+                                "R\u00e9initialiser le contexte"
+                        ],
+                        [
+                                1,
+                                "Ex\u00e9cuter du JavaScript"
+                        ],
+                        [
+                                2,
+                                "Appeler une fonction JS"
+                        ],
+                        [
+                                3,
+                                "Reconstruire les liaisons MMFI"
+                        ],
+                        [
+                                4,
+                                "Tester les classes maintenant"
+                        ]
+                ],
+                "ConditionMenu": [
+                        [
+                                0,
+                                "Sur erreur JavaScript"
+                        ]
+                ],
+                "ExpressionMenu": [
+                        [
+                                0,
+                                "DernierR\u00e9sultat$"
+                        ],
+                        [
+                                1,
+                                "DernierNombre"
+                        ],
+                        [
+                                2,
+                                "Derni\u00e8reErreur$"
+                        ],
+                        [
+                                3,
+                                "SupportClasse"
+                        ],
+                        [
+                                4,
+                                "CadreActuel"
+                        ],
+                        [
+                                5,
+                                "NombreObjets"
+                        ],
+                        [
+                                6,
+                                "TypeDernierR\u00e9sultat"
+                        ],
+                        [
+                                7,
+                                "DernierBool"
+                        ]
+                ],
+                "Actions": [
+                        {
+                                "Title": "R\u00e9initialiser le contexte Duktape"
+                        },
+                        {
+                                "Title": "Ex\u00e9cuter le JavaScript %0",
+                                "Parameters": [
+                                        [
+                                                "Text",
+                                                "Code JavaScript"
+                                        ]
+                                ]
+                        },
+                        {
+                                "Title": "Appeler l'expression de fonction JS %0",
+                                "Parameters": [
+                                        [
+                                                "Text",
+                                                "Appel de fonction avec arguments"
+                                        ]
+                                ]
+                        },
+                        {
+                                "Title": "Reconstruire les liaisons MMFI"
+                        },
+                        {
+                                "Title": "Tester les classes maintenant",
+                                "Info": "Relance le test de syntaxe de classe ES6 \u00e0 la demande"
+                        }
+                ],
+                "Conditions": [
+                        {
+                                "Title": "Sur erreur JavaScript",
+                                "Triggered": true
+                        }
+                ],
+                "Expressions": [
+                        {
+                                "Title": "DernierR\u00e9sultat$(",
+                                "Returns": "Text"
+                        },
+                        {
+                                "Title": "DernierNombre(",
+                                "Returns": "Float"
+                        },
+                        {
+                                "Title": "Derni\u00e8reErreur$(",
+                                "Returns": "Text"
+                        },
+                        {
+                                "Title": "SupportClasse(",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "CadreActuel(",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "NombreObjets(",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "TypeDernierR\u00e9sultat(",
+                                "Info": "Renvoie 1 pour nombre, 2 pour bool\u00e9en, 3 pour cha\u00eene, 0 sinon",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "DernierBool(",
+                                "Info": "Renvoie 1 si le dernier r\u00e9sultat \u00e9tait true, 0 sinon",
+                                "Returns": "Integer"
+                        }
+                ],
+                "Properties": [
+                        {
+                                "Title": "Code d'initialisation",
+                                "Info": "JavaScript ex\u00e9cut\u00e9 \u00e0 la cr\u00e9ation du contexte",
+                                "Type": "Editbox String",
+                                "DefaultState": ""
+                        },
+                        {
+                                "Title": "Exposer MMFI au d\u00e9marrage",
+                                "Info": "Injecter automatiquement l'objet mmf",
+                                "Type": "Checkbox",
+                                "DefaultState": true
+                        },
+                        {
+                                "Title": "Tester les classes au d\u00e9marrage",
+                                "Info": "Lancer un test de syntaxe class apr\u00e8s la cr\u00e9ation du contexte",
+                                "Type": "Checkbox",
+                                "DefaultState": true
+                        }
+                ]
+        }
 }
