@@ -104,6 +104,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\Lib\Shared\SurfaceMultiPlat.cpp">
       <Filter>Global to all extensions\Edif</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)thirdparty\pugixml.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)IsoWorldTypes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

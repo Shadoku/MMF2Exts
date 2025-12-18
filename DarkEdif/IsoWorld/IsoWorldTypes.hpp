@@ -12,7 +12,6 @@
 #include <variant>
 #include <vector>
 
-#define PUGIXML_HEADER_ONLY
 #include "thirdparty/pugixml.hpp"
 
 #include "thirdparty/json.hpp"

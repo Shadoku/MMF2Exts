@@ -44,6 +44,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)Expressions.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Extension.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)Runtime.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)thirdparty\pugixml.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)IsoWorldTypes.cpp" />
   </ItemGroup>
 </Project>
