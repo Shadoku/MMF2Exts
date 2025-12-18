@@ -82,6 +82,17 @@ All projects in this repository use a shared Visual Studio props file, found in 
 2. If you are converting from one SDK to another, most of the work will be done for you.
 3. Adding a new project configuration (example, you have Edittime, and you add Edittime Unicode), the props file will read the project configuration name and apply the settings for Edittime and Unicode; making it non-debug, adding the `_UNICODE` defines, etc.
 
+## Python-first Fusion SDK prototype
+
+The repository now contains an experimental Python SDK (`fusionpy_sdk`) that mirrors the proposed Fusion Python Extension SDK for Windows. It includes:
+
+* Decorators and an `Extension` base class for defining actions, conditions, expressions, properties, and lifecycle hooks.
+* Manifest validation helpers for `fusion_extension.yml`/`.json` descriptors.
+* A CLI (`python -m fusionpy_sdk.cli`) with `init`, `validate`, `build`, `run`, and `publish` subcommands to scaffold, validate, bundle, and stage Python extensions for the Windows host bridge.
+* Build tooling that freezes Python bytecode and packages declared resources for distribution.
+
+See `docs/fusionpy-sdk.md` for architecture details and usage guidance.
+
 ## SDK variants
 
 ### MMF2SDK
@@ -148,4 +159,3 @@ If you don't want to provide Fusion 2.0 ANSI compatiblity, you can remove the no
 [Edif Clickteam forum thread]: https://community.clickteam.com/threads/61692-Edif-Extension-Development-Is-Fun
 [Windows SDK archive]: https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/
 [Link to PuTTY]: https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
-
