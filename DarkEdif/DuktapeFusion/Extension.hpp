@@ -1,6 +1,8 @@
 #pragma once
 #include "DarkEdif.hpp"
 #include "duktape/duktape.h"
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 class Extension
@@ -18,6 +20,17 @@ public:
     Edif::Runtime Runtime;
     std::vector<duk_context*> contexts;
     int currentCtx = -1;
+
+    struct ScriptInfo
+    {
+        int contextId = -1;
+        std::string source;
+        std::string stashKey;
+        int altStringIndex = 0;
+        bool runEveryFrame = false;
+    };
+
+    std::unordered_map<int, ScriptInfo> registeredScripts;
 
 	static const int MinimumBuild = 254;
 	static const int Version = 1;
@@ -74,13 +87,24 @@ public:
                 void RunJSScript(const TCHAR* ScriptText);
                 // Switch current context
                 void SetContext(int ctxId);
+                // Register an object's alterable string JS for execution
+                void RegisterObjectScript(int fixedValue, int altStringIndex, int runEveryFrame);
+                // Remove a previously registered object script
+                void UnregisterObjectScript(int fixedValue);
+                // Invoke a registered object's script immediately
+                void InvokeObjectScript(int fixedValue);
 
         /// Conditions
                 bool DummyCondition();
+                bool IsObjectRegistered(int fixedValue);
 
         /// Expressions
                 const TCHAR* EvalJS(const TCHAR* ExpressionText);
                 int NewContext();
+
+        bool CacheObjectScript(int fixedValue, RunObjectMultiPlatPtr obj, int altStringIndex, bool runEveryFrame);
+        bool ExecuteObjectScript(int fixedValue, ScriptInfo& info, RunObjectMultiPlatPtr obj);
+        void ClearScriptReference(const ScriptInfo& info);
 
 
         // JS helpers for Fusion object access

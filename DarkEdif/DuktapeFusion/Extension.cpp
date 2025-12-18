@@ -23,8 +23,12 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
 
         LinkAction(0, RunJSScript);
         LinkAction(1, SetContext);
+        LinkAction(2, RegisterObjectScript);
+        LinkAction(3, UnregisterObjectScript);
+        LinkAction(4, InvokeObjectScript);
 
         LinkCondition(0, DummyCondition);
+        LinkCondition(1, IsObjectRegistered);
 
         LinkExpression(0, EvalJS);
         LinkExpression(1, NewContext);
@@ -71,6 +75,9 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
 
 Extension::~Extension()
 {
+        for (auto& entry : registeredScripts)
+                ClearScriptReference(entry.second);
+        registeredScripts.clear();
         for (auto ctx : contexts)
                 duk_destroy_heap(ctx);
 }
@@ -108,8 +115,35 @@ REFLAG Extension::Handle()
 
 	*/
 
-	// Will not be called next loop
-	return REFLAG::ONE_SHOT;
+    for (auto it = registeredScripts.begin(); it != registeredScripts.end(); )
+    {
+        auto& info = it->second;
+        if (!info.runEveryFrame)
+        {
+            ++it;
+            continue;
+        }
+
+        if (info.contextId < 0 || info.contextId >= (int)contexts.size())
+        {
+            ClearScriptReference(info);
+            it = registeredScripts.erase(it);
+            continue;
+        }
+
+        RunObjectMultiPlatPtr obj = Runtime.RunObjPtrFromFixed(it->first);
+        if (!obj)
+        {
+            ClearScriptReference(info);
+            it = registeredScripts.erase(it);
+            continue;
+        }
+
+        ExecuteObjectScript(it->first, info, obj);
+        ++it;
+    }
+
+    return REFLAG::NONE;
 }
 
 
@@ -275,4 +309,127 @@ duk_ret_t Extension::JS_SetAltValue(duk_context* ctx)
                 ro->get_rov()->SetAltValueAtIndex(index, duk_get_number(ctx, 2));
         }
         return 0;
+}
+
+bool Extension::CacheObjectScript(int fixedValue, RunObjectMultiPlatPtr obj, int altStringIndex, bool runEveryFrame)
+{
+        if (currentCtx < 0 || currentCtx >= (int)contexts.size())
+        {
+                DarkEdif::MsgBox::Error(_T("JS Error"), _T("No active context to register script."));
+                return false;
+        }
+
+        if (!obj || !obj->get_rov())
+        {
+                DarkEdif::MsgBox::Error(_T("JS Error"), _T("Could not resolve object for registration."));
+                return false;
+        }
+
+        std::size_t stringCount = obj->get_rov()->GetAltStringCount();
+        if (altStringIndex < 0 || (std::size_t)altStringIndex >= stringCount)
+        {
+                DarkEdif::MsgBox::Error(_T("JS Error"), _T("Alterable string index is out of range."));
+                return false;
+        }
+
+        const TCHAR* rawScript = obj->get_rov()->GetAltStringAtIndex((std::size_t)altStringIndex);
+        if (!rawScript || rawScript[0] == 0)
+        {
+                DarkEdif::MsgBox::Error(_T("JS Error"), _T("Alterable string is empty; nothing to register."));
+                return false;
+        }
+
+        std::string scriptUTF8 = DarkEdif::TStringToUTF8(rawScript);
+        std::string wrapper = "(function(meta){\n" + scriptUTF8 + "\n})";
+
+        duk_context* ctx = contexts[currentCtx];
+        if (duk_pcompile_lstring(ctx, DUK_COMPILE_FUNCTION, wrapper.c_str(), wrapper.size()) != 0)
+        {
+                const char* err = duk_safe_to_string(ctx, -1);
+                DarkEdif::MsgBox::Error(_T("JS Error"), DarkEdif::UTF8ToTString(err).c_str());
+                duk_pop(ctx);
+                return false;
+        }
+
+        std::string stashKey = "fusion_script_" + std::to_string(currentCtx) + "_" + std::to_string(fixedValue);
+
+        duk_push_heap_stash(ctx);
+        duk_dup(ctx, -2);
+        duk_put_prop_string(ctx, -2, stashKey.c_str());
+        duk_pop_2(ctx);
+
+        auto existing = registeredScripts.find(fixedValue);
+        if (existing != registeredScripts.end())
+        {
+                ClearScriptReference(existing->second);
+        }
+
+        ScriptInfo info;
+        info.contextId = currentCtx;
+        info.source = scriptUTF8;
+        info.stashKey = stashKey;
+        info.altStringIndex = altStringIndex;
+        info.runEveryFrame = runEveryFrame;
+
+        registeredScripts[fixedValue] = std::move(info);
+        return true;
+}
+
+bool Extension::ExecuteObjectScript(int fixedValue, ScriptInfo& info, RunObjectMultiPlatPtr obj)
+{
+        if (info.contextId < 0 || info.contextId >= (int)contexts.size())
+        {
+            return false;
+        }
+
+        duk_context* ctx = contexts[info.contextId];
+        duk_push_heap_stash(ctx);
+        if (!duk_get_prop_string(ctx, -1, info.stashKey.c_str()))
+        {
+                duk_pop(ctx);
+                return false;
+        }
+
+        duk_require_function(ctx, -1);
+        duk_remove(ctx, -2); // remove stash, leave function
+
+        HeaderObject* ho = obj ? obj->get_rHo() : nullptr;
+        duk_push_object(ctx);
+        duk_push_int(ctx, fixedValue);
+        duk_put_prop_string(ctx, -2, "fixedValue");
+        duk_push_int(ctx, info.altStringIndex);
+        duk_put_prop_string(ctx, -2, "altStringIndex");
+        duk_push_boolean(ctx, info.runEveryFrame);
+        duk_put_prop_string(ctx, -2, "runEveryFrame");
+        duk_push_int(ctx, info.contextId);
+        duk_put_prop_string(ctx, -2, "contextId");
+        if (ho)
+        {
+                duk_push_int(ctx, ho->X);
+                duk_put_prop_string(ctx, -2, "x");
+                duk_push_int(ctx, ho->Y);
+                duk_put_prop_string(ctx, -2, "y");
+        }
+
+        if (duk_pcall(ctx, 1) != 0)
+        {
+                const char* err = duk_safe_to_string(ctx, -1);
+                DarkEdif::MsgBox::Error(_T("JS Error"), DarkEdif::UTF8ToTString(err).c_str());
+                duk_pop(ctx);
+                return false;
+        }
+
+        duk_pop(ctx);
+        return true;
+}
+
+void Extension::ClearScriptReference(const ScriptInfo& info)
+{
+        if (info.contextId < 0 || info.contextId >= (int)contexts.size() || info.stashKey.empty())
+                return;
+
+        duk_context* ctx = contexts[info.contextId];
+        duk_push_heap_stash(ctx);
+        duk_del_prop_string(ctx, -1, info.stashKey.c_str());
+        duk_pop(ctx);
 }
