@@ -28,6 +28,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Resource.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)IsoWorldTypes.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)thirdparty\json.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)thirdparty\pugiconfig.hpp" />
     <ClInclude Include="$(MSBuildThisFileDirectory)thirdparty\pugixml.hpp" />
   </ItemGroup>
   <ItemGroup>

@@ -60,6 +60,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)thirdparty\json.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)thirdparty\pugiconfig.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)thirdparty\pugixml.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
