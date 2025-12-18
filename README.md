@@ -120,6 +120,25 @@ More details on DarkEdif are available in the Wiki, see:
 * [DarkEdif ext dev features] for a list of features available to a DarkEdif extension developer
 * [DarkEdif Fusion user features] for a list of features available to Fusion users
 
+## fusionpy SDK quickstart
+
+The repository now ships a Fusion-ready Python host bridge and SDK CLI. Download the latest bundle from `releases/fusionpy-bundle-<version>.zip` and run the installer:
+
+```
+powershell -ExecutionPolicy Bypass -File installer\fusionpy_installer.ps1 -FusionPath "C:\\Program Files\\Clickteam\\Fusion 2.5\\Fusion.exe" -AddToPath
+```
+
+After installation, use the bundled CLI via `fusionpy`:
+
+```
+fusionpy init --path fusionpy.json
+fusionpy build --manifest fusionpy.json --output dist
+fusionpy run --fusion "C:\\...\\Fusion.exe" --manifest fusionpy.json
+fusionpy publish --manifest fusionpy.json --output releases
+```
+
+The installer includes Win32/Win64 host bridge binaries, a minimal Python runtime, the `fusionpy_sdk` wheel, and a `fusionpy.cmd` launcher that ensures the bundled runtime is used. See `docs/fusionpy-sdk.md` for manifest fields and packaging behavior.
+
 ## How to convert ANSI functions to ANSI & Unicode
 Make sure you're aware of what any text-related function you call expects. Does it ask for number of elements in array, or number of bytes in array?
 Note TCHAR is a preprocessor definition provided by Microsoft, which will be replaced with char in ANSI builds, and wchar_t in Unicode builds.
@@ -148,4 +167,3 @@ If you don't want to provide Fusion 2.0 ANSI compatiblity, you can remove the no
 [Edif Clickteam forum thread]: https://community.clickteam.com/threads/61692-Edif-Extension-Development-Is-Fun
 [Windows SDK archive]: https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/
 [Link to PuTTY]: https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
-
