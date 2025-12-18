@@ -84,13 +84,27 @@ Extension::~Extension()
 
 bool Extension::EnsureCurrentContext()
 {
-        if (currentCtx >= 0 && currentCtx < (int)contexts.size())
+        auto hasCtx = [this](int idx) -> bool {
+                return idx >= 0 && idx < (int)contexts.size() && contexts[idx] != nullptr;
+        };
+
+        if (hasCtx(currentCtx))
                 return true;
 
-        if (!contexts.empty())
+        if (hasCtx(0))
         {
                 currentCtx = 0;
                 return true;
+        }
+
+        if (!contexts.empty())
+        {
+                // slot exists but the heap was destroyed; rebuild the shared context
+                if (RebuildContext(0))
+                {
+                        currentCtx = 0;
+                        return true;
+                }
         }
 
         return NewContext() >= 0;
@@ -135,6 +149,17 @@ bool Extension::RebuildContext(int ctxId)
         if (ctxId < 0)
                 return false;
 
+        std::vector<std::tuple<int, int, bool>> toRestore;
+        toRestore.reserve(registeredScripts.size());
+        for (auto& entry : registeredScripts)
+        {
+                toRestore.emplace_back(entry.first, entry.second.altStringIndex, entry.second.runEveryFrame);
+        }
+
+        duk_context* newCtx = CreateContextWithHelpers();
+        if (!newCtx)
+                return false;
+
         // Destroy any extra contexts so we keep one shared heap around.
         for (size_t i = 0; i < contexts.size(); ++i)
         {
@@ -151,16 +176,7 @@ bool Extension::RebuildContext(int ctxId)
         if (contexts[ctxId])
                 duk_destroy_heap(contexts[ctxId]);
 
-        contexts[ctxId] = CreateContextWithHelpers();
-        if (!contexts[ctxId])
-                return false;
-
-        std::vector<std::tuple<int, int, bool>> toRestore;
-        toRestore.reserve(registeredScripts.size());
-        for (auto& entry : registeredScripts)
-        {
-                toRestore.emplace_back(entry.first, entry.second.altStringIndex, entry.second.runEveryFrame);
-        }
+        contexts[ctxId] = newCtx;
         registeredScripts.clear();
 
         int previousCtx = currentCtx;
@@ -227,6 +243,13 @@ REFLAG Extension::Handle()
         }
 
         if (info.contextId < 0 || info.contextId >= (int)contexts.size())
+        {
+            ClearScriptReference(info);
+            it = registeredScripts.erase(it);
+            continue;
+        }
+
+        if (contexts[info.contextId] == nullptr)
         {
             ClearScriptReference(info);
             it = registeredScripts.erase(it);
@@ -485,6 +508,8 @@ bool Extension::ExecuteObjectScript(int fixedValue, ScriptInfo& info, RunObjectM
         }
 
         duk_context* ctx = contexts[info.contextId];
+        if (!ctx)
+                return false;
         duk_push_heap_stash(ctx);
         if (!duk_get_prop_string(ctx, -1, info.stashKey.c_str()))
         {
@@ -531,6 +556,8 @@ void Extension::ClearScriptReference(const ScriptInfo& info)
                 return;
 
         duk_context* ctx = contexts[info.contextId];
+        if (!ctx)
+                return;
         duk_push_heap_stash(ctx);
         duk_del_prop_string(ctx, -1, info.stashKey.c_str());
         duk_pop(ctx);

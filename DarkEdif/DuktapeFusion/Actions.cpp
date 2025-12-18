@@ -14,9 +14,14 @@ void Extension::RunJSScript(const TCHAR* ScriptText)
 
 void Extension::SetContext(int ctxId)
 {
-    if(ctxId>=0 && ctxId<(int)contexts.size()) currentCtx = ctxId;
-    else if (!contexts.empty()) currentCtx = 0;
-    else EnsureCurrentContext();
+    if(ctxId>=0 && ctxId<(int)contexts.size()) {
+        currentCtx = ctxId;
+    }
+    else if (!contexts.empty()) {
+        currentCtx = 0;
+    }
+
+    EnsureCurrentContext();
 }
 
 void Extension::RegisterObjectScript(int fixedValue, int altStringIndex, int runEveryFrame)
