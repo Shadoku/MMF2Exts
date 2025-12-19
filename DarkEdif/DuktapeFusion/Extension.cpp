@@ -88,12 +88,12 @@ Extension::~Extension()
 
 bool Extension::EnsureCurrentContext()
 {
-        if (currentCtx < 0 || currentCtx >= (int)contexts.size())
-                currentCtx = 0;
-
         auto hasCtx = [this](int idx) -> bool {
                 return idx >= 0 && idx < (int)contexts.size() && contexts[idx] != nullptr;
         };
+
+        if (currentCtx < 0 || currentCtx >= (int)contexts.size())
+                currentCtx = 0;
 
         if (hasCtx(currentCtx))
                 return true;
@@ -114,7 +114,15 @@ bool Extension::EnsureCurrentContext()
                 }
         }
 
-        return NewContext() >= 0;
+        int newCtx = NewContext();
+        if (newCtx < 0)
+        {
+                currentCtx = -1;
+                return false;
+        }
+
+        currentCtx = newCtx;
+        return true;
 }
 
 duk_context* Extension::CreateContextWithHelpers()
