@@ -1,4 +1,6 @@
 #include "Common.hpp"
+#include <fstream>
+#include <sstream>
 
 ///
 /// EXTENSION CONSTRUCTOR/DESTRUCTOR
@@ -26,6 +28,8 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
         LinkAction(2, RegisterObjectScript);
         LinkAction(3, UnregisterObjectScript);
         LinkAction(4, InvokeObjectScript);
+        LinkAction(5, RunScriptFile);
+        LinkAction(6, SetModuleRoot);
 
         LinkCondition(0, DummyCondition);
         LinkCondition(1, IsObjectRegistered);
@@ -139,6 +143,14 @@ duk_context* Extension::CreateContextWithHelpers()
         duk_put_prop_string(ctx, -2, "\xff\xffext");
         duk_put_prop_string(ctx, -2, "setAltValue");
         duk_put_prop_string(ctx, -2, "fusion");
+        // module cache placeholder
+        duk_push_heap_stash(ctx);
+        duk_push_object(ctx);
+        duk_put_prop_string(ctx, -2, "moduleCache");
+        duk_pop(ctx);
+        // global require bound to module root
+        PushRequireFunction(ctx, DarkEdif::TStringToUTF8(moduleRootPath));
+        duk_put_global_string(ctx, "require");
         duk_pop(ctx);
 
         return ctx;
@@ -434,6 +446,274 @@ duk_ret_t Extension::JS_SetAltValue(duk_context* ctx)
                 ro->get_rov()->SetAltValueAtIndex(index, duk_get_number(ctx, 2));
         }
         return 0;
+}
+
+std::string Extension::NormalizePath(const std::string& path) const
+{
+        std::string norm = path;
+        for (auto& c : norm)
+        {
+                if (c == '\\')
+                        c = '/';
+        }
+        while (norm.size() > 1 && norm.back() == '/')
+        {
+                norm.pop_back();
+        }
+        return norm;
+}
+
+std::string Extension::JoinPath(const std::string& base, const std::string& relative) const
+{
+        if (relative.empty())
+                return NormalizePath(base);
+
+        if (relative.front() == '/' || relative.front() == '\\')
+                return NormalizePath(relative);
+
+        std::string joined = base;
+        if (!joined.empty() && joined.back() != '/' && joined.back() != '\\')
+                joined.push_back('/');
+        joined += relative;
+        return NormalizePath(joined);
+}
+
+std::string Extension::DirName(const std::string& path) const
+{
+        std::string norm = NormalizePath(path);
+        size_t pos = norm.find_last_of('/');
+        if (pos == std::string::npos)
+                return "";
+        return norm.substr(0, pos);
+}
+
+bool Extension::FileExists(const std::string& path) const
+{
+        std::ifstream f(path, std::ios::binary);
+        return f.good();
+}
+
+bool Extension::ReadFileUTF8(const std::string& path, std::string& out) const
+{
+        std::ifstream file(path, std::ios::binary);
+        if (!file)
+                return false;
+
+        std::ostringstream ss;
+        ss << file.rdbuf();
+        out = ss.str();
+        return true;
+}
+
+std::string Extension::ExtractPackageMain(const std::string& json) const
+{
+        const std::string key = "\"main\"";
+        size_t pos = json.find(key);
+        if (pos == std::string::npos)
+                return "";
+
+        pos = json.find(':', pos + key.size());
+        if (pos == std::string::npos)
+                return "";
+
+        pos = json.find('"', pos);
+        if (pos == std::string::npos)
+                return "";
+
+        size_t end = json.find('"', pos + 1);
+        if (end == std::string::npos || end <= pos + 1)
+                return "";
+
+        return json.substr(pos + 1, end - pos - 1);
+}
+
+std::string Extension::ResolveAsFileOrDirectory(const std::string& path)
+{
+        std::string normalized = NormalizePath(path);
+        if (FileExists(normalized))
+                return normalized;
+
+        if (FileExists(normalized + ".js"))
+                return normalized + ".js";
+
+        std::string packageJson = JoinPath(normalized, "package.json");
+        if (FileExists(packageJson))
+        {
+                std::string json;
+                if (ReadFileUTF8(packageJson, json))
+                {
+                        std::string mainEntry = ExtractPackageMain(json);
+                        if (!mainEntry.empty())
+                        {
+                                std::string mainPath = ResolveAsFileOrDirectory(JoinPath(normalized, mainEntry));
+                                if (!mainPath.empty())
+                                        return mainPath;
+                        }
+                }
+        }
+
+        std::string indexPath = JoinPath(normalized, "index.js");
+        if (FileExists(indexPath))
+                return indexPath;
+
+        return "";
+}
+
+std::string Extension::ResolveModulePath(const std::string& specifier, const std::string& parentDir)
+{
+        if (specifier.empty())
+                return "";
+
+        std::string baseDir = parentDir.empty() ? DarkEdif::TStringToUTF8(moduleRootPath) : parentDir;
+        baseDir = NormalizePath(baseDir);
+
+        bool isAbsolute = (specifier.size() > 1 && specifier[1] == ':') || specifier.front() == '/' || specifier.front() == '\\';
+        bool isRelative = specifier.front() == '.';
+        if (isAbsolute)
+        {
+                return ResolveAsFileOrDirectory(NormalizePath(specifier));
+        }
+        else if (isRelative)
+        {
+                return ResolveAsFileOrDirectory(JoinPath(baseDir, specifier));
+        }
+
+        std::string searchDir = baseDir;
+        while (!searchDir.empty())
+        {
+                std::string candidate = ResolveAsFileOrDirectory(JoinPath(JoinPath(searchDir, "node_modules"), specifier));
+                if (!candidate.empty())
+                        return candidate;
+
+                size_t slashPos = searchDir.find_last_of('/');
+                if (slashPos == std::string::npos)
+                        break;
+                searchDir = searchDir.substr(0, slashPos);
+        }
+
+        return ResolveAsFileOrDirectory(JoinPath(DarkEdif::TStringToUTF8(moduleRootPath), specifier));
+}
+
+bool Extension::EnsureModuleCache(duk_context* ctx)
+{
+        duk_push_heap_stash(ctx);
+        if (!duk_get_prop_string(ctx, -1, "moduleCache"))
+        {
+                duk_pop(ctx);
+                duk_push_object(ctx);
+                duk_dup(ctx, -1);
+                duk_put_prop_string(ctx, -3, "moduleCache");
+        }
+        duk_remove(ctx, -2);
+        return true;
+}
+
+void Extension::PushRequireFunction(duk_context* ctx, const std::string& baseDir)
+{
+        duk_push_c_function(ctx, JS_Require, 1);
+        duk_push_pointer(ctx, this);
+        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_push_string(ctx, baseDir.c_str());
+        duk_put_prop_string(ctx, -2, "\xff\xffbasedir");
+}
+
+bool Extension::LoadModule(duk_context* ctx, const std::string& resolvedPath, const std::string& baseDir)
+{
+        if (!ctx)
+                return false;
+
+        duk_idx_t baseTop = duk_get_top(ctx);
+        EnsureModuleCache(ctx);
+        duk_idx_t cacheIdx = duk_get_top_index(ctx);
+
+        duk_push_string(ctx, resolvedPath.c_str());
+        if (duk_get_prop(ctx, cacheIdx))
+        {
+                duk_remove(ctx, cacheIdx);
+                if (baseTop > 0)
+                        duk_remove(ctx, 0);
+                return true;
+        }
+        duk_pop(ctx);
+
+        std::string source;
+        if (!ReadFileUTF8(resolvedPath, source))
+        {
+                DarkEdif::MsgBox::Error(_T("JS Error"), (DarkEdif::UTF8ToTString("Failed to read file: ") + DarkEdif::UTF8ToTString(resolvedPath)).c_str());
+                duk_set_top(ctx, baseTop);
+                return false;
+        }
+
+        std::string wrapped = "(function(exports, require, module, __filename, __dirname){\n" + source + "\n})";
+        if (duk_pcompile_lstring(ctx, DUK_COMPILE_FUNCTION, wrapped.c_str(), wrapped.size()) != 0)
+        {
+                const char* err = duk_safe_to_string(ctx, -1);
+                DarkEdif::MsgBox::Error(_T("JS Error"), DarkEdif::UTF8ToTString(err).c_str());
+                duk_set_top(ctx, baseTop);
+                return false;
+        }
+
+        duk_push_object(ctx); // exports
+        PushRequireFunction(ctx, baseDir); // require
+        duk_push_object(ctx); // module
+        duk_dup(ctx, -3);     // exports -> module.exports
+        duk_put_prop_string(ctx, -2, "exports");
+        duk_push_string(ctx, resolvedPath.c_str());
+        duk_put_prop_string(ctx, -2, "filename");
+        duk_push_string(ctx, baseDir.c_str());
+        duk_put_prop_string(ctx, -2, "dirname");
+        duk_push_string(ctx, resolvedPath.c_str());
+        duk_push_string(ctx, baseDir.c_str());
+
+        // preserve exports for caching after call
+        duk_dup(ctx, 2);
+        duk_insert(ctx, 0);
+
+        // stack: exportsCopy, cache, func, exports, require, module, filename, dirname
+        if (duk_pcall(ctx, 5) != 0)
+        {
+                const char* err = duk_safe_to_string(ctx, -1);
+                DarkEdif::MsgBox::Error(_T("JS Error"), DarkEdif::UTF8ToTString(err).c_str());
+                duk_pop_3(ctx); // error, cache, exportsCopy
+                duk_set_top(ctx, baseTop);
+                return false;
+        }
+
+        duk_pop(ctx); // pop return value
+        duk_dup(ctx, 0); // exportsCopy
+        duk_put_prop_string(ctx, 2, resolvedPath.c_str()); // cache at index 2 after pop?
+        duk_remove(ctx, 2); // remove cache
+        duk_set_top(ctx, 1); // keep exports only
+        return true;
+}
+
+duk_ret_t Extension::JS_Require(duk_context* ctx)
+{
+        const char* spec = duk_require_string(ctx, 0);
+
+        duk_push_current_function(ctx);
+        duk_get_prop_string(ctx, -1, "\xff\xffext");
+        Extension* ext = (Extension*)duk_get_pointer(ctx, -1);
+        duk_pop(ctx);
+        duk_get_prop_string(ctx, -1, "\xff\xffbasedir");
+        std::string baseDir = duk_is_string(ctx, -1) ? duk_get_string(ctx, -1) : "";
+        duk_pop_2(ctx);
+
+        if (!ext)
+                return duk_error(ctx, DUK_ERR_ERROR, "No extension bound to require().");
+
+        std::string resolved = ext->ResolveModulePath(spec ? spec : "", baseDir);
+        if (resolved.empty())
+        {
+                return duk_error(ctx, DUK_ERR_ERROR, "Cannot find module: %s", spec ? spec : "(null)");
+        }
+
+        if (!ext->LoadModule(ctx, resolved, ext->DirName(resolved)))
+        {
+                return duk_error(ctx, DUK_ERR_ERROR, "Failed to load module: %s", spec ? spec : "(null)");
+        }
+
+        return 1;
 }
 
 bool Extension::CacheObjectScript(int fixedValue, RunObjectMultiPlatPtr obj, int altStringIndex, bool runEveryFrame)

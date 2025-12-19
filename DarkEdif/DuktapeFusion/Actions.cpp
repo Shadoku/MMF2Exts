@@ -67,3 +67,44 @@ void Extension::InvokeObjectScript(int fixedValue)
 
     ExecuteObjectScript(fixedValue, it->second, obj);
 }
+
+void Extension::RunScriptFile(const TCHAR* filePath)
+{
+    if (!EnsureCurrentContext())
+        return;
+
+    std::string spec = DarkEdif::TStringToUTF8(filePath ? filePath : _T(""));
+    std::string baseDir = DarkEdif::TStringToUTF8(moduleRootPath);
+    std::string resolved = ResolveModulePath(spec, baseDir);
+    if (resolved.empty())
+    {
+        DarkEdif::MsgBox::Error(_T("JS Error"), _T("Could not resolve script file path."));
+        return;
+    }
+
+    if (LoadModule(contexts[currentCtx], resolved, DirName(resolved)))
+    {
+        duk_pop(contexts[currentCtx]); // discard exports after top-level load
+    }
+}
+
+void Extension::SetModuleRoot(const TCHAR* rootPath)
+{
+    moduleRootPath = (rootPath && rootPath[0]) ? rootPath : _T(".");
+
+    if (!EnsureCurrentContext())
+        return;
+
+    std::string baseDir = DarkEdif::TStringToUTF8(moduleRootPath);
+    for (auto* ctx : contexts)
+    {
+        if (!ctx)
+                continue;
+        duk_push_heap_stash(ctx);
+        duk_del_prop_string(ctx, -1, "moduleCache");
+        duk_pop(ctx);
+
+        PushRequireFunction(ctx, baseDir);
+        duk_put_global_string(ctx, "require");
+    }
+}

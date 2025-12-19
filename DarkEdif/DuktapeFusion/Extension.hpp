@@ -21,6 +21,7 @@ public:
     Edif::Runtime Runtime;
     std::vector<duk_context*> contexts;
     int currentCtx = -1;
+    std::tstring moduleRootPath = _T(".");
 
     struct ScriptInfo
     {
@@ -101,11 +102,27 @@ public:
 
         /// Expressions
         const TCHAR* EvalJS(const TCHAR* ExpressionText);
-                int NewContext();
+        int NewContext();
 
         bool CacheObjectScript(int fixedValue, RunObjectMultiPlatPtr obj, int altStringIndex, bool runEveryFrame);
         bool ExecuteObjectScript(int fixedValue, ScriptInfo& info, RunObjectMultiPlatPtr obj);
         void ClearScriptReference(const ScriptInfo& info);
+        void RunScriptFile(const TCHAR* filePath);
+        void SetModuleRoot(const TCHAR* rootPath);
+
+        // Module loader helpers
+        bool LoadModule(duk_context* ctx, const std::string& resolvedPath, const std::string& baseDir);
+        std::string ResolveModulePath(const std::string& specifier, const std::string& parentDir);
+        std::string ResolveAsFileOrDirectory(const std::string& path);
+        std::string DirName(const std::string& path) const;
+        std::string JoinPath(const std::string& base, const std::string& relative) const;
+        std::string NormalizePath(const std::string& path) const;
+        bool ReadFileUTF8(const std::string& path, std::string& out) const;
+        bool FileExists(const std::string& path) const;
+        std::string ExtractPackageMain(const std::string& json) const;
+        void PushRequireFunction(duk_context* ctx, const std::string& baseDir);
+        bool EnsureModuleCache(duk_context* ctx);
+        static duk_ret_t JS_Require(duk_context* ctx);
         bool EnsureCurrentContext();
         duk_context* CreateContextWithHelpers();
         bool RebuildContext(int ctxId);
