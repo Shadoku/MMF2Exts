@@ -1,12 +1,13 @@
-/* vim: set et ts=4 sw=4 sts=4 ft=cpp:
+/* vim: set noet ts=4 sw=4 sts=4 ft=cpp:
  *
  * Copyright (C) 2011 James McLaughlin.
- * Copyright (C) 2012-2022 Darkwire Software.
+ * Copyright (C) 2012-2025 Darkwire Software.
  * All rights reserved.
  *
  * liblacewing and Lacewing Relay/Blue source code are available under MIT license.
- * https://opensource.org/licenses/mit-license.php
+ * https://opensource.org/license/mit
 */
+
 #include "Lacewing.h"
 #include <vector>
 #include <assert.h>
@@ -56,9 +57,7 @@ public:
 			if (this->size + size > allocated)
 				allocated += size;
 
-			char * test = (char *) realloc(this->buffer, allocated);
-			assert(test && "could not reallocate buffer for message.");
-			this->buffer = test;
+			this->buffer = (char *)lw_realloc_or_exit(this->buffer, allocated);
 		}
 
 		memcpy(this->buffer + this->size, buffer, size);

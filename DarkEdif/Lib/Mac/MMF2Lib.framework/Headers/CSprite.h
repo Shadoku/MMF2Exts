@@ -2,11 +2,11 @@
 *
 * This source code is part of the iOS exporter for Clickteam Multimedia Fusion 2
 * and Clickteam Fusion 2.5.
-* 
-* Permission is hereby granted to any person obtaining a legal copy 
-* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source 
-* code for debugging, optimizing, or customizing applications created with 
-* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5. 
+*
+* Permission is hereby granted to any person obtaining a legal copy
+* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source
+* code for debugging, optimizing, or customizing applications created with
+* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5.
 * Any other use of this source code is prohibited.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -22,7 +22,6 @@
 // CSPRITE : Un sprite
 //
 //----------------------------------------------------------------------------------
-#pragma once
 #import <Foundation/Foundation.h>
 #import "IDrawable.h"
 #import "CRect.h"
@@ -61,11 +60,11 @@
 @class CBitmap;
 @class CImage;
 
-@interface CSprite : NSObject 
+@interface CSprite : NSObject
 {
 @public
 
-	// Donnees 
+	// Donnees
     CSprite* objPrev;
     CSprite* objNext;
     CImageBank* bank;
@@ -107,14 +106,14 @@
     float sprScaleY;
 
     // Temporary values for collisions
-    short sprTempImg;			// TODO: use DWORD later?
+    unsigned short sprTempImg;			// TODO: use DWORD later?
     short sprTempAngle;
     float sprTempScaleX;
     float sprTempScaleY;
 
     // Image or owner-draw routine
-    short sprImg;		        /// Numero d'image
-    short sprImgNew;			/// Nouvelle image
+    unsigned short sprImg;		        /// Numero d'image
+    unsigned short sprImgNew;			/// Nouvelle image
     id<IDrawable> sprRout;			/// Ownerdraw callback routine
 
     // Ink effect
@@ -137,7 +136,7 @@
 	CImage* sprSf;
 	CImage* sprTempSf;
 }
--(id)initWithBank:(CImageBank*)b; 
+-(id)initWithBank:(CImageBank*)b;
 -(void)dealloc;
 -(int)getSpriteLayer;
 -(int)getSpriteFlags;
@@ -151,7 +150,7 @@
 -(void)draw:(CRenderer*)renderer;
 -(CRect)getSpriteRect;
 -(void)updateBoundingBox;
--(void)calcBoundingBox:(short)newImg withX:(int)newX andY:(int)newY andAngle:(float)newAngle andScaleX:(float)newScaleX andScaleY:(float)newScaleY andRect:(CRect)prc;
+-(void)calcBoundingBox:(unsigned short)newImg withX:(int)newX andY:(int)newY andAngle:(float)newAngle andScaleX:(float)newScaleX andScaleY:(float)newScaleY andRect:(CRect)prc;
 -(void)killSpriteZone;
 
 @end

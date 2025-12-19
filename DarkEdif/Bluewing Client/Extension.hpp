@@ -7,16 +7,15 @@ void NewEvent(EventToRun *);
 static constexpr std::uint16_t CLEAR_EVTNUM = 0xFFFF;
 static constexpr std::uint16_t DUMMY_EVTNUM = 35353;
 
-class Extension
+class Extension final
 {
 public:
-	// Hide stuff requiring other headers
-	std::shared_ptr<EventToRun> threadData; // Must be first variable in Extension class
-	std::tstring_view loopName;
-	static std::atomic<bool> AppWasClosed;
-
+	// ======================================
+	// Required variables + functions
+	// Variables here must not be moved or swapped around or it can cause future issues
+	// ======================================
 	RunHeader* rhPtr;
-	RunObjectMultiPlatPtr rdPtr; // you should not need to access this
+	RunObjectMultiPlatPtr rdPtr;
 #ifdef __ANDROID__
 	global<jobject> javaExtPtr;
 #elif defined(__APPLE__)
@@ -28,32 +27,25 @@ public:
 	static const int MinimumBuild = 251;
 	static const int Version = lacewing::relayclient::buildnum;
 
-	static const OEFLAGS OEFLAGS = OEFLAGS::NEVER_KILL | OEFLAGS::NEVER_SLEEP; // Use OEFLAGS namespace
-	static const OEPREFS OEPREFS = OEPREFS::GLOBAL; // Use OEPREFS namespace
-
-	static const int WindowProcPriority = 100;
+	static constexpr OEFLAGS OEFLAGS = OEFLAGS::NEVER_KILL | OEFLAGS::NEVER_SLEEP;
+	static constexpr OEPREFS OEPREFS = OEPREFS::NONE;
 
 #ifdef _WIN32
 	Extension(RunObject* const rdPtr, const EDITDATA* const edPtr, const CreateObjectInfo* const cobPtr);
 #elif defined(__ANDROID__)
-	Extension(const EDITDATA* const edPtr, const jobject javaExtPtr);
+	Extension(const EDITDATA* const edPtr, const jobject javaExtPtr, const CreateObjectInfo* const cobPtr);
 #else
-	Extension(const EDITDATA* const edPtr, void* const objCExtPtr);
+	Extension(const EDITDATA* const edPtr, void* const objCExtPtr, const CreateObjectInfo* const cobPtr);
 #endif
 	~Extension();
 
+	// ======================================
+	// Extension data
+	// ======================================
 
-	/*  Add any data you want to store in your extension to this class
-		(eg. what you'd normally store in rdPtr).
-
-		For those using multi-threading, any variables that are modified
-		by the threads should be in EventToRun.
-		See MultiThreading.h.
-
-		Unlike rdPtr, you can store real C++ objects with constructors
-		and destructors, without having to call them manually or store
-		a pointer.
-	*/
+	std::shared_ptr<EventToRun> threadData;
+	std::tstring_view loopName;
+	static std::atomic<bool> AppWasClosed;
 
 	bool isGlobal;
 
@@ -166,6 +158,7 @@ public:
 	void Connect(const TCHAR* Hostname);
 	void SendMsg_Resize(int NewSize);
 	void SetDestroySetting(int enabled);
+	void SetLocalPortForHolePunch(int port);
 
 	/// Conditions
 
@@ -306,26 +299,7 @@ public:
 	int ConvToUTF8_GetByteCount(const TCHAR* tStr);
 	const TCHAR* ConvToUTF8_TestAllowList(const TCHAR* tStr, const TCHAR* charset);
 
-	/* These are called if there's no function linked to an ID */
-
-	void UnlinkedAction(int ID);
-	long UnlinkedCondition(int ID);
-	long UnlinkedExpression(int ID);
-
-
-
-	/*  These replace the functions like HandleRunObject that used to be
-		implemented in Runtime.cpp. They work exactly the same, but they're
-		inside the extension class.
-	*/
-
-	REFLAG Handle();
-	REFLAG Display();
-
-	short FusionRuntimePaused();
-	short FusionRuntimeContinued();
-
-	struct GlobalInfo
+	struct GlobalInfo final
 	{
 		// Lacewing event queue and ticker
 		std::unique_ptr<lacewing::_eventpump, std::function<decltype(eventpumpdeleter)>> _objEventPump;
@@ -341,7 +315,7 @@ public:
 		// Binary message to send
 		char* _sendMsg;
 		// Number of bytes in binary message to send (sendMsg)
-		size_t _sendMsgSize;
+		std::size_t _sendMsgSize;
 
 		// Previous name of this client, as UTF-8
 		std::string _previousName;
@@ -382,6 +356,23 @@ public:
 		std::thread::id mainThreadID;
 		// If single-threaded, indicates if Lacewing is being ticked by Handle(). Used for error message location.
 		bool lacewingTicking = false;
+		// Local port used when doing a connection. If 0, unset and OS picks.
+		// @remarks Firewall hole punching works by having both sides connect to each other at the same time,
+		// using pre-supplied local ports - which can be random, but must be known.
+		// Since outgoing connections are allowed, the routers generate an exception for that connection;
+		// and the incoming connection's matching tuple of
+		//		(local IP, local port, remote IP, remote port)
+		// plus exception specifically for that, creates a two-way exception through the firewall.
+		// However, when NAT is involved (network address translation, like port forwarding), it can get
+		// a mismatch and this will fail.
+		// Since uPnP is an IPv4 tech mostly, hole punching is useful for IPv6 clients behind rigid firewalls;
+		// that aside, uPnP is not always on in routers, and IPv4 hole punching can work for them.
+		unsigned short localPort = 0;
+
+		// Max size of a UDP message - good values are 1400 bytes for Ethernet MTU,
+		// and 576 bytes for minimum IPv4 packet transmissible without fragmentation.
+		// Another size of note is a bit under 16KiB, due to SSL record size + Lacewing headers.
+		unsigned short maxUDPSize = lacewing::relay_max_udp_payload;
 
 		// Locks and queues an EventToRun with 1 condition ID to trigger
 		void AddEvent1(std::uint16_t event1ID,
@@ -410,9 +401,7 @@ public:
 		void CreateError(PrintFHintInside const char* errorText, ...) PrintFHintAfter(2, 3);
 		void CreateError(PrintFHintInside const char* errorText, va_list v) PrintFHintAfter(2, 0);
 
-
 		// Constructor and destructor
-
 		GlobalInfo(Extension* e, const EDITDATA* const edPtr);
 
 		// Due to Runtime.WriteGlobal() not working if there's no Extension,
@@ -422,4 +411,12 @@ public:
 		void MarkAsPendingDelete();
 		~GlobalInfo() noexcept(false);
 	};
+
+	// Runs every tick of Fusion's runtime, can be toggled off and back on
+	REFLAG Handle();
+
+	// These are called if there's no function linked to an ID
+	void UnlinkedAction(int ID);
+	long UnlinkedCondition(int ID);
+	long UnlinkedExpression(int ID);
 };
