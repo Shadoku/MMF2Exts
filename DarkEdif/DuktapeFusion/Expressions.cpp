@@ -1,4 +1,5 @@
 #include "Common.hpp"
+#include <sstream>
 
 const TCHAR* Extension::EvalJS(const TCHAR* ExpressionText)
 {
@@ -23,21 +24,32 @@ const TCHAR* Extension::EvalJS(const TCHAR* ExpressionText)
 
 int Extension::NewContext()
 {
+    std::ostringstream ss;
+    ss << "NewContext: entry currentCtx=" << currentCtx << " contexts=" << contexts.size();
+    DebugTrace(ss.str());
     if (contexts.empty())
     {
         duk_context* ctx = CreateContextWithHelpers();
         if (!ctx)
-                return -1;
+        {
+            DebugTrace("NewContext: CreateContextWithHelpers failed on empty init");
+            return -1;
+        }
 
         contexts.push_back(ctx);
         currentCtx = 0;
+        DebugTraceContextState("NewContext: initial context created");
         return currentCtx;
     }
 
     int targetCtx = (currentCtx >= 0 && currentCtx < (int)contexts.size()) ? currentCtx : 0;
     if (!RebuildContext(targetCtx))
-            return -1;
+    {
+        DebugTrace("NewContext: RebuildContext failed");
+        return -1;
+    }
 
     currentCtx = targetCtx;
+    DebugTraceContextState("NewContext: rebuilt context");
     return currentCtx;
 }

@@ -126,6 +126,8 @@ public:
         bool EnsureCurrentContext();
         duk_context* CreateContextWithHelpers();
         bool RebuildContext(int ctxId);
+        void DebugTrace(const std::string& message) const;
+        void DebugTraceContextState(const char* stage) const;
 
 
         // JS helpers for Fusion object access
