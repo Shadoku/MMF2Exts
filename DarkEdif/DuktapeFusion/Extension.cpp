@@ -88,6 +88,9 @@ Extension::~Extension()
 
 bool Extension::EnsureCurrentContext()
 {
+        if (currentCtx < 0 || currentCtx >= (int)contexts.size())
+                currentCtx = 0;
+
         auto hasCtx = [this](int idx) -> bool {
                 return idx >= 0 && idx < (int)contexts.size() && contexts[idx] != nullptr;
         };
@@ -747,7 +750,9 @@ bool Extension::CacheObjectScript(int fixedValue, RunObjectMultiPlatPtr obj, int
         std::string scriptUTF8 = DarkEdif::TStringToUTF8(rawScript);
         std::string wrapper = "(function(meta){\n" + scriptUTF8 + "\n})";
 
-        duk_context* ctx = contexts[currentCtx];
+        duk_context* ctx = (currentCtx >= 0 && currentCtx < (int)contexts.size()) ? contexts[currentCtx] : nullptr;
+        if (!ctx)
+                return false;
         if (duk_pcompile_lstring(ctx, DUK_COMPILE_FUNCTION, wrapper.c_str(), wrapper.size()) != 0)
         {
                 const char* err = duk_safe_to_string(ctx, -1);

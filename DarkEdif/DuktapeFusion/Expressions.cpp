@@ -4,16 +4,20 @@ const TCHAR* Extension::EvalJS(const TCHAR* ExpressionText)
 {
     if (!EnsureCurrentContext())
         return Runtime.CopyString(_T(""));
+
+    duk_context* ctx = (currentCtx >= 0 && currentCtx < (int)contexts.size()) ? contexts[currentCtx] : nullptr;
+    if (!ctx)
+        return Runtime.CopyString(_T(""));
     std::string utf8 = DarkEdif::TStringToUTF8(ExpressionText);
-    if (duk_peval_string(contexts[currentCtx], utf8.c_str()) != 0) {
-        const char* err = duk_safe_to_string(contexts[currentCtx], -1);
+    if (duk_peval_string(ctx, utf8.c_str()) != 0) {
+        const char* err = duk_safe_to_string(ctx, -1);
         DarkEdif::MsgBox::Error(_T("JS Error"), DarkEdif::UTF8ToTString(err).c_str());
-        duk_pop(contexts[currentCtx]);
+        duk_pop(ctx);
         return Runtime.CopyString(_T(""));
     }
-    const char* res = duk_safe_to_string(contexts[currentCtx], -1);
+    const char* res = duk_safe_to_string(ctx, -1);
     std::tstring tres = DarkEdif::UTF8ToTString(res ? res : "");
-    duk_pop(contexts[currentCtx]);
+    duk_pop(ctx);
     return Runtime.CopyString(tres.c_str());
 }
 

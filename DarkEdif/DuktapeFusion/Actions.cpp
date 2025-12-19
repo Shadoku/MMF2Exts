@@ -4,12 +4,16 @@ void Extension::RunJSScript(const TCHAR* ScriptText)
 {
     if (!EnsureCurrentContext())
         return;
+
+    duk_context* ctx = (currentCtx >= 0 && currentCtx < (int)contexts.size()) ? contexts[currentCtx] : nullptr;
+    if (!ctx)
+        return;
     std::string utf8 = DarkEdif::TStringToUTF8(ScriptText);
-    if (duk_peval_string(contexts[currentCtx], utf8.c_str()) != 0) {
-        const char* err = duk_safe_to_string(contexts[currentCtx], -1);
+    if (duk_peval_string(ctx, utf8.c_str()) != 0) {
+        const char* err = duk_safe_to_string(ctx, -1);
         DarkEdif::MsgBox::Error(_T("JS Error"), DarkEdif::UTF8ToTString(err).c_str());
     }
-    duk_pop(contexts[currentCtx]);
+    duk_pop(ctx);
 }
 
 void Extension::SetContext(int ctxId)
@@ -17,7 +21,7 @@ void Extension::SetContext(int ctxId)
     if(ctxId>=0 && ctxId<(int)contexts.size()) {
         currentCtx = ctxId;
     }
-    else if (!contexts.empty()) {
+    else {
         currentCtx = 0;
     }
 
@@ -73,6 +77,10 @@ void Extension::RunScriptFile(const TCHAR* filePath)
     if (!EnsureCurrentContext())
         return;
 
+    duk_context* ctx = (currentCtx >= 0 && currentCtx < (int)contexts.size()) ? contexts[currentCtx] : nullptr;
+    if (!ctx)
+        return;
+
     std::string spec = DarkEdif::TStringToUTF8(filePath ? filePath : _T(""));
     std::string baseDir = DarkEdif::TStringToUTF8(moduleRootPath);
     std::string resolved = ResolveModulePath(spec, baseDir);
@@ -82,9 +90,9 @@ void Extension::RunScriptFile(const TCHAR* filePath)
         return;
     }
 
-    if (LoadModule(contexts[currentCtx], resolved, DirName(resolved)))
+    if (LoadModule(ctx, resolved, DirName(resolved)))
     {
-        duk_pop(contexts[currentCtx]); // discard exports after top-level load
+        duk_pop(ctx); // discard exports after top-level load
     }
 }
 
