@@ -5,7 +5,7 @@
 		"About": {
 			"Name": "Lacewing Blue Server",
 			"Author": "Darkwire Software",
-			"Copyright": "Copyright \u00A9 2024 by Darkwire Software",
+			"Copyright": "Copyright \u00A9 2025 by Darkwire Software",
 			"Comment": "Multiplayer server, for use over LAN or internet. \"Bluewing\" recreation of Lacewing Relay Server. (b%i, %s)",
 			"Help": "Help/Lacewing Help.chm",
 			"URL": "https://dark-wire.com/relay/"
@@ -13,7 +13,9 @@
 		"ActionMenu": [
 			[ "Relay Server",
 				[ 0, "Host" ],
-				[ 1, "Stop hosting" ]
+				[ 1, "Stop hosting" ],
+				"---",
+				[ 94, "Hole punch to future client" ]
 			],
 			[ "Flash Player Policy Server",
 				[ 68, "Host" ],
@@ -844,6 +846,13 @@
 				"Parameters": [
 					[ "Integer", "Channel ID (0 to 65534, inclusive)" ]
 				]
+			},
+			{
+				"Title": "Hole punch connect to future client IP %0 (local port %1)",
+				"Parameters": [
+					[ "Text", "Remote IP address (with port)" ],
+					[ "Integer", "Local port, or 0 to pick free port" ]
+				]
 			}
 		],
 		"Conditions": [
@@ -1558,7 +1567,7 @@
 		"About": {
 			"Name": "Servidor Lacewing Blue",
 			"Author": "Darkwire Software",
-			"Copyright": "Copyright \u00A9 2022 por Darkwire Software",
+			"Copyright": "Copyright \u00A9 2025 por Darkwire Software",
 			"Comment": "Servidor multijogador para usar em LAN ou através da internet. \"Bluewing\" recriação do Servidor Lacewing Relay. (b%i, %s)",
 			"Help": "Help/BluewingServer.chm",
 			"URL": "https://dark-wire.com/relay/"
@@ -2402,6 +2411,13 @@
 				"Parameters": [
 					[ "Integer", "ID" ]
 				]
+			},
+			{ // TODO: Translate
+				"Title": "Hole punch connect to future client IP %0 (local port %1)",
+				"Parameters": [
+					[ "Text", "IP address (with port)" ],
+					[ "Integer", "Local port, or 0 to pick free port" ]
+				]
 			}
 		],
 		"Conditions": [
@@ -3121,7 +3137,7 @@
 		"About": {
 			"Name": "Serveur Lacewing Blue",
 			"Author": "Darkwire Software",
-			"Copyright": "Copyright \u00A9 2022 par Darkwire Software",
+			"Copyright": "Copyright \u00A9 2025 par Darkwire Software",
 			"Comment": "Serveur multijoueur, pour utilisation par LAN ou internet. \"Bluewing\", une refonte de Lacewing Relay Server. (b%i, %s)",
 			"Help": "Help/BluewingServer.chm",
 			"URL": "https://dark-wire.com/relay/"
@@ -3950,6 +3966,13 @@
 				"Title": "Sélectionner le canal de ID %0",
 				"Parameters": [
 					[ "Integer", "ID" ]
+				]
+			},
+			{ // TODO: Translate
+				"Title": "Hole punch connect to future client IP %0 (local port %1)",
+				"Parameters": [
+					[ "Text", "IP address (with port)" ],
+					[ "Integer", "Local port, or 0 to pick free port" ]
 				]
 			}
 		],

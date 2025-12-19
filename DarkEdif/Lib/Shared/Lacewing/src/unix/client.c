@@ -1,11 +1,11 @@
 /* vim: set noet ts=4 sw=4 sts=4 ft=c:
  *
  * Copyright (C) 2011, 2012 James McLaughlin et al.
- * Copyright (C) 2012-2022 Darkwire Software.
+ * Copyright (C) 2012-2025 Darkwire Software.
  * All rights reserved.
  *
  * liblacewing and Lacewing Relay/Blue source code are available under MIT license.
- * https://opensource.org/licenses/mit-license.php
+ * https://opensource.org/license/mit
 */
 
 #include "../common.h"
@@ -31,12 +31,13 @@ struct _lw_client
 
 	lw_addr address;
 
-	int socket;
+	lwp_socket socket;
 	//lw_bool connecting; // part of flags, see lw_client_flag_connecting
 	lw_timer connect_timer;
 
 	lw_pump pump;
 	lw_pump_watch watch;
+	lw_ui16 local_port_next_connect;
 };
 
 void lw_client_connect_timeout(lw_timer timer)
@@ -71,7 +72,7 @@ lw_client lw_client_new (lw_pump pump)
 
 	lwp_fdstream_init (&ctx->fdstream, pump);
 
-	ctx->connect_timer = lw_timer_new(pump);
+	ctx->connect_timer = lw_timer_new(pump, "lw_client connect timer");
 	lw_timer_set_tag (ctx->connect_timer, ctx);
 	lw_timer_on_tick (ctx->connect_timer, lw_client_connect_timeout);
 
@@ -109,7 +110,8 @@ static void first_time_write_ready (void * tag)
 
 	lw_client ctx = (lw_client)tag;
 
-	assert (ctx->flags & lw_client_flag_connecting);
+	// This is sometimes true when connection fails instantly
+	// assert (!(ctx->flags & lw_client_flag_connecting))
 
 	lw_timer_stop (ctx->connect_timer);
 
@@ -191,7 +193,7 @@ void lw_client_connect_addr (lw_client ctx, lw_addr address)
 	lw_addr_delete (ctx->address);
 	ctx->address = lw_addr_clone (address);
 
-	if (!address->info)
+	if (!ctx->address->info)
 	{
 		ctx->flags &= ~lw_client_flag_connecting;
 
@@ -206,7 +208,7 @@ void lw_client_connect_addr (lw_client ctx, lw_addr address)
 		return;
 	}
 
-	if ((ctx->socket = socket (lw_addr_ipv6 (address) ? AF_INET6 : AF_INET,
+	if ((ctx->socket = socket (lw_addr_ipv6 (ctx->address) ? AF_INET6 : AF_INET,
 				SOCK_STREAM,
 				IPPROTO_TCP)) == -1)
 	{
@@ -229,31 +231,43 @@ void lw_client_connect_addr (lw_client ctx, lw_addr address)
 	// Android doesn't support AI_V4MAPPED, despite defining it.
 	// Due to that, https://stackoverflow.com/questions/5587935/cant-turn-off-socket-option-ipv6-v6only#comment15775318_8213504
 #if !defined(__ANDROID__) && !defined(__APPLE__)
-	if (lw_addr_ipv6(address))
+	if (lw_addr_ipv6(ctx->address))
 		lwp_disable_ipv6_only((lwp_socket)ctx->socket);
+#endif
 
 	struct sockaddr_storage local_address = {0};
 
-	if (lw_addr_ipv6(address))
+	if (lw_addr_ipv6(ctx->address))
 	{
 		((struct sockaddr_in6 *)&local_address)->sin6_family = AF_INET6;
 		((struct sockaddr_in6 *)&local_address)->sin6_addr = in6addr_any;
+		((struct sockaddr_in6 *)&local_address)->sin6_port = htons(ctx->local_port_next_connect);
 	}
 	else
 	{
 		((struct sockaddr_in *)&local_address)->sin_family = AF_INET;
 		((struct sockaddr_in *)&local_address)->sin_addr.s_addr = INADDR_ANY;
+		((struct sockaddr_in *)&local_address)->sin_port = htons(ctx->local_port_next_connect);
 	}
 
-	if (bind(ctx->socket,
-		(struct sockaddr *)&local_address, sizeof(local_address)) == -1)
+	const int was_locked_local = ctx->local_port_next_connect != 0 ? 1 : 0;
+	ctx->local_port_next_connect = 0;
+
+	// reuse or not, based on reserved port
+	lwp_setsockopt(ctx->socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&was_locked_local, sizeof(was_locked_local));
+
+	if (bind(ctx->socket, (struct sockaddr *)&local_address,
+		// iOS does not work with sizeof sockaddr_storage
+		lw_addr_ipv6(ctx->address) ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in)) == -1)
 	{
 		ctx->flags &= ~lw_client_flag_connecting;
+		close(ctx->socket);
+		ctx->socket = -1;
 
 		lw_error error = lw_error_new();
 
 		lw_error_add(error, errno);
-		lw_error_addf(error, "Error binding socket");
+		lw_error_addf(error, "Error binding socket%s", was_locked_local ? " with fixed port" : "");
 
 		if (ctx->on_error)
 			ctx->on_error(ctx, error);
@@ -262,7 +276,6 @@ void lw_client_connect_addr (lw_client ctx, lw_addr address)
 
 		return;
 	}
-#endif
 
 	if (connect (ctx->socket, address->info->ai_addr,
 			address->info->ai_addrlen) == -1)
@@ -275,9 +288,10 @@ void lw_client_connect_addr (lw_client ctx, lw_addr address)
 			goto good; // No problem
 		}
 
+		close(ctx->socket);
+		ctx->socket = -1;
 		ctx->flags &= ~ lw_client_flag_connecting;
 
-		// Connecting errors are also reported in first_time_write_ready()
 		lw_error error = lw_error_new ();
 
 		lw_error_add (error, errno);
@@ -287,6 +301,7 @@ void lw_client_connect_addr (lw_client ctx, lw_addr address)
 			ctx->on_error (ctx, error);
 
 		lw_error_delete (error);
+		return;
 	}
 
 	// Else
@@ -299,6 +314,11 @@ good:
 	}
 
 	ctx->watch = lw_pump_add(ctx->pump, ctx->socket, ctx, 0, first_time_write_ready, lw_true);
+}
+
+void lw_client_set_local_port (lw_client ctx, lw_ui16 localport)
+{
+	ctx->local_port_next_connect = localport;
 }
 
 lw_bool lw_client_connected (lw_client ctx)

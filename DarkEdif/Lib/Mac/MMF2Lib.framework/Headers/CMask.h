@@ -2,11 +2,11 @@
 *
 * This source code is part of the iOS exporter for Clickteam Multimedia Fusion 2
 * and Clickteam Fusion 2.5.
-* 
-* Permission is hereby granted to any person obtaining a legal copy 
-* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source 
-* code for debugging, optimizing, or customizing applications created with 
-* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5. 
+*
+* Permission is hereby granted to any person obtaining a legal copy
+* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source
+* code for debugging, optimizing, or customizing applications created with
+* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5.
 * Any other use of this source code is prohibited.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -22,7 +22,6 @@
 // CMASK : un masque
 //
 //----------------------------------------------------------------------------------
-#pragma once
 #import <Foundation/Foundation.h>
 
 #define SCMF_FULL 0x0000
@@ -32,7 +31,7 @@
 
 @class CImage;
 
-@interface CMask : NSObject 
+@interface CMask : NSObject
 {
 @public
 	short* mask;
@@ -45,6 +44,7 @@
 }
 -(void)dealloc;
 -(void)createMask:(CImage*)img withFlags:(int)nFlags;
+-(void)createOpaqueMask:(CImage*)img withFlags:(int)nFlags;
 -(BOOL)testMask:(int)yBase1 withX1:(int)x1 andY1:(int)y1 andMask:(CMask*)pMask2 andYBase:(int)yBase2 andX2:(int)x2 andY2:(int)y2;
 -(BOOL)testRect:(int)yBase1 withX:(int)xx andY:(int)yy andWidth:(int)w andHeight:(int)h;
 -(BOOL)testPoint:(int)x1 withY:(int)y1;

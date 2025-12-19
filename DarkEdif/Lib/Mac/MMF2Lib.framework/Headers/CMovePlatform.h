@@ -2,11 +2,11 @@
 *
 * This source code is part of the iOS exporter for Clickteam Multimedia Fusion 2
 * and Clickteam Fusion 2.5.
-* 
-* Permission is hereby granted to any person obtaining a legal copy 
-* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source 
-* code for debugging, optimizing, or customizing applications created with 
-* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5. 
+*
+* Permission is hereby granted to any person obtaining a legal copy
+* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source
+* code for debugging, optimizing, or customizing applications created with
+* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5.
 * Any other use of this source code is prohibited.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -22,7 +22,6 @@
 // CMOVEPLATFORM : Mouvement plateforme
 //
 //----------------------------------------------------------------------------------
-#pragma once
 #import <Foundation/Foundation.h>
 #import "CMove.h"
 
@@ -59,7 +58,7 @@
     CObject* MP_ObjectUnder;
     int MP_XObjectUnder;
     int MP_YObjectUnder;
-    BOOL MP_NoJump;	
+    BOOL MP_NoJump;
 }
 -(void)initMovement:(CObject*)ho withMoveDef:(CMoveDef*)mvPtr;
 -(void)move;

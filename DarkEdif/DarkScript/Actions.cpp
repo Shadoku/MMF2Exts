@@ -499,7 +499,7 @@ void Extension::RunFunction_Foreach_Num(RunObject*, int dummy)
 	// a qualifier, which we can't tell from reading the RunObject *. However, the qualifier OI number is
 	// hard-coded as a variable in the event sheet, and you can't modify which object is in a parameter live,
 	// so we can read it back from the event sheet directly.
-	const short oil = Runtime.GetOIFromObjectParam(0);
+	const short oil = Runtime.GetOIListIndexFromObjectParam(0);
 
 	globals->runningFuncs.push_back(funcToRun);
 	Sub_RunPendingForeachFunc(oil, funcToRun);
@@ -511,7 +511,7 @@ void Extension::RunFunction_Foreach_Num(RunObject*, int dummy)
 	// you just run as if the RunObject * is the only instance this action is being run on, and the
 	// Fusion runtime will cycle through each selected object, changing the RunObject * passed by the event.
 	// Otherwise, you cancel this behaviour, and loop the selection yourself.
-	// 
+	//
 	// We want fine-tuned control over loop behaviour - qualifier <-> singular, and stopping loops
 	// midway - so we do it ourselves.
 	// We run this at end of the action, after foreach, as the generated events may cause the cancel
@@ -527,7 +527,7 @@ void Extension::RunFunction_Foreach_String(RunObject*, const TCHAR* dummy)
 	// We store temp copies, so a Foreach expression's can run a Foreach itself without corrupting
 	auto funcToRun = foreachFuncToRun;
 	foreachFuncToRun = nullptr;
-	short oil = Runtime.GetOIFromObjectParam(0);
+	short oil = Runtime.GetOIListIndexFromObjectParam(0);
 
 	globals->runningFuncs.push_back(funcToRun);
 	Sub_RunPendingForeachFunc(oil, funcToRun);
@@ -764,9 +764,9 @@ void Extension::RunFunction_Script(const TCHAR* script)
 			values.push_back(funcTemplate->params[values.size() - 1].defaultVal);
 		}
 	}
-	
+
 	const std::shared_ptr<RunningFunction> runningFunc = std::make_shared<RunningFunction>(funcTemplate, true, repeatCount - 1);
-	for (size_t i = 0; i < values.size(); i++)
+	for (std::size_t i = 0; i < values.size(); ++i)
 		runningFunc->paramValues[i] = values[i];
 	runningFunc->numPassedParams = numPassedExpFuncParams;
 	runningFunc->keepObjectSelection = keepSelection;
@@ -840,13 +840,12 @@ void Extension::RunningFunc_SetReturnI(int value)
 	Value * const val = &rf->returnValue;
 	// TODO: Complain or ignore delayed func return types?
 	// Delayed func return types will be Any.
-	if (val->type != Type::Integer)
+	if (rf->expectedReturnType != Type::Integer && rf->expectedReturnType != Type::Any)
 	{
-		std::tstring typeName = _T("no return value"s);
-		if (val->type != Type::Any)
-			typeName = TypeToString(val->type) + _T(" return type"s);
+		// TODO: Check conversion here.
+		//if (conversionStrictness == ConversionStrictness::Numeric)
 		return CreateErrorT("Can't return type %s from function %s, expected %s.",
-			_T("integer"), rf->funcTemplate->name.c_str(), typeName.c_str());
+			_T("integer"), rf->funcTemplate->name.c_str(), TypeToString(rf->expectedReturnType));
 	}
 	if (val->type == Type::String)
 		free(val->data.string);
@@ -862,13 +861,10 @@ void Extension::RunningFunc_SetReturnF(float value)
 		return;
 
 	Value * const val = &rf->returnValue;
-	if (val->type != Type::Float)
+	if (rf->expectedReturnType != Type::Float && rf->expectedReturnType != Type::Any)
 	{
-		std::tstring typeName = _T("no return value");
-		if (val->type != Type::Any)
-			typeName = TypeToString(val->type) + std::tstring(_T(" return type"));
 		return CreateErrorT("Can't return type %s from function %s, expected %s.",
-			_T("float"), rf->funcTemplate->name.c_str(), typeName.c_str());
+			_T("float"), rf->funcTemplate->name.c_str(), TypeToString(rf->expectedReturnType));
 	}
 	if (val->type == Type::String)
 		free(val->data.string);
@@ -884,13 +880,10 @@ void Extension::RunningFunc_SetReturnS(const TCHAR * newVal)
 		return;
 
 	Value * const val = &rf->returnValue;
-	if (val->type != Type::String)
+	if (rf->expectedReturnType != Type::String && rf->expectedReturnType != Type::Any)
 	{
-		std::tstring typeName = _T("no return value");
-		if (val->type != Type::Any)
-			typeName = TypeToString(val->type) + std::tstring(_T(" return type"));
-		return CreateErrorT("Can't return type %s from function %s, expected %s.",
-			_T("string"), rf->funcTemplate->name.c_str(), typeName.c_str());
+		return CreateErrorT("Can't return type %s from function %s, expected %s return type.",
+			_T("string"), rf->funcTemplate->name.c_str(), TypeToString(rf->expectedReturnType));
 	}
 
 	// TODO: realloc, combine size_t measurements for dup alloc and copy

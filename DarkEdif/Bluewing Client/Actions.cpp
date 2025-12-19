@@ -137,7 +137,12 @@ void Extension::BlastTextToServer(int subchannel, const TCHAR * textToSend)
 	if (subchannel > 255 || subchannel < 0)
 		CreateError("Blast Text to Server was called with invalid subchannel %i; it must be between 0 and 255.", subchannel);
 	else
-		Cli.blastserver(subchannel, DarkEdif::TStringToUTF8(textToSend), 0);
+	{
+		const std::string utf8Msg = DarkEdif::TStringToUTF8(textToSend);
+		if (utf8Msg.size() > globals->maxUDPSize)
+			return CreateError("Blast Text to Server was called with text too large (%zu bytes).", utf8Msg.size());
+		Cli.blastserver(subchannel, utf8Msg, 0);
+	}
 }
 void Extension::BlastTextToChannel(int subchannel, const TCHAR * textToSend)
 {
@@ -148,7 +153,12 @@ void Extension::BlastTextToChannel(int subchannel, const TCHAR * textToSend)
 	else if (selChannel->readonly())
 		CreateError("Blast Text to Channel was called with read-only channel \"%s\".", selChannel->name().c_str());
 	else
-		selChannel->blast(subchannel, DarkEdif::TStringToUTF8(textToSend), 0);
+	{
+		const std::string utf8Msg = DarkEdif::TStringToUTF8(textToSend);
+		if (utf8Msg.size() > globals->maxUDPSize)
+			return CreateError("Blast Text to Channel was called with text too large (%zu bytes).", utf8Msg.size());
+		selChannel->blast(subchannel, utf8Msg, 0);
+	}
 }
 void Extension::BlastTextToPeer(int subchannel, const TCHAR * textToSend)
 {
@@ -159,7 +169,12 @@ void Extension::BlastTextToPeer(int subchannel, const TCHAR * textToSend)
 	else if (selPeer->readonly())
 		CreateError("Blast Text to Peer was called with read-only peer \"%s\".", selPeer->name().c_str());
 	else
-		selPeer->blast(subchannel, DarkEdif::TStringToUTF8(textToSend), 0);
+	{
+		const std::string utf8Msg = DarkEdif::TStringToUTF8(textToSend);
+		if (utf8Msg.size() > globals->maxUDPSize)
+			return CreateError("Blast Text to Peer was called with text too large (%zu bytes).", utf8Msg.size());
+		selPeer->blast(subchannel, utf8Msg, 0);
+	}
 }
 void Extension::BlastNumberToServer(int subchannel, int numToSend)
 {
@@ -415,6 +430,8 @@ void Extension::BlastBinaryToServer(int subchannel)
 {
 	if (subchannel > 255 || subchannel < 0)
 		CreateError("Blast Binary to Server was called with invalid subchannel %i; it must be between 0 and 255.", subchannel);
+	else if (SendMsgSize > globals->maxUDPSize)
+		CreateError("Blast Binary to Server was called with binary too large (%zu bytes).", SendMsgSize);
 	else
 		Cli.blastserver(subchannel, std::string_view(SendMsg, SendMsgSize), 2);
 
@@ -429,6 +446,8 @@ void Extension::BlastBinaryToChannel(int subchannel)
 		CreateError("Blast Binary to Channel was called without a channel being selected.");
 	else if (selChannel->readonly())
 		CreateError("Blast Binary to Channel was called with read-only channel \"%s\".", selChannel->name().c_str());
+	else if (SendMsgSize > globals->maxUDPSize)
+		CreateError("Blast Binary to Channel was called with binary too large (%zu bytes).", SendMsgSize);
 	else
 		selChannel->blast(subchannel, std::string_view(SendMsg, SendMsgSize), 2);
 
@@ -443,6 +462,8 @@ void Extension::BlastBinaryToPeer(int subchannel)
 		CreateError("Blast Binary to Peer was called without a peer being selected.");
 	else if (selPeer->readonly())
 		CreateError("Blast Binary to Peer was called with a read-only peer.");
+	else if (SendMsgSize > globals->maxUDPSize)
+		CreateError("Blast Binary to Peer was called with binary too large (%zu bytes).", SendMsgSize);
 	else
 		selPeer->blast(subchannel, std::string_view(SendMsg, SendMsgSize), 2);
 
@@ -899,15 +920,18 @@ void Extension::Connect(const TCHAR * hostname)
 		return CreateError("Cannot connect to server: invalid hostname supplied.");
 
 	int Port = 6121;
-	const TCHAR * portPtr = _tcsrchr(hostname, _T(':'));
-	if (portPtr)
+	std::string hostnameU8(DarkEdif::TStringToUTF8(hostname));
+	const std::size_t colonCount = std::count(hostnameU8.cbegin(), hostnameU8.cend(), ':');
+	const bool isIPv6Box = hostnameU8.find('[') != std::string::npos;
+	const TCHAR* portPtr = (colonCount == 1 || isIPv6Box) ? _tcsrchr(hostname, _T(':')) : NULL;
+	// IPv4/hostname, or IPv6 [ip]:port layout - with check for : not being index 0
+	if (portPtr && (colonCount == 1 || (isIPv6Box && portPtr > hostname && *(portPtr - 1) == _T(']'))))
 	{
 		Port = _ttoi(portPtr + 1);
 
 		if (Port <= 0 || Port > 0xFFFF)
-			return CreateError("Invalid port in hostname: too many numbers. Ports are limited from 1 to 65535.");
+			return CreateError("Invalid port in hostname (%s). Ports are limited from 1 to 65535.", DarkEdif::TStringToUTF8(portPtr + 1).c_str());
 	}
-	std::string hostnameU8(DarkEdif::TStringToUTF8(hostname));
 	Cli.connect(hostnameU8.c_str(), Port);
 }
 void Extension::SendMsg_Resize(int newSize)
@@ -932,4 +956,10 @@ void Extension::SetDestroySetting(int enabled)
 	if (enabled > 1 || enabled < 0)
 		return CreateError("Invalid setting passed to SetDestroySetting, expecting 0 or 1.");
 	globals->fullDeleteEnabled = enabled != 0;
+}
+void Extension::SetLocalPortForHolePunch(int port)
+{
+	if (port < 1 || port > std::numeric_limits<unsigned short>::max())
+		return CreateError("Invalid local port passed, expecting 1 through 65535, got %d.", port);
+	globals->_client.setlocalport(globals->localPort = (unsigned short)port);
 }

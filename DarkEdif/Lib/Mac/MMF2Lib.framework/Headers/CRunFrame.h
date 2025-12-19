@@ -2,11 +2,11 @@
 *
 * This source code is part of the iOS exporter for Clickteam Multimedia Fusion 2
 * and Clickteam Fusion 2.5.
-* 
-* Permission is hereby granted to any person obtaining a legal copy 
-* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source 
-* code for debugging, optimizing, or customizing applications created with 
-* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5. 
+*
+* Permission is hereby granted to any person obtaining a legal copy
+* of Clickteam Multimedia Fusion 2 or Clickteam Fusion 2.5 to use or modify this source
+* code for debugging, optimizing, or customizing applications created with
+* Clickteam Multimedia Fusion 2 and/or Clickteam Fusion 2.5.
 * Any other use of this source code is prohibited.
 *
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -22,8 +22,8 @@
 // CRUNFRAME : contenu d'une frame
 //
 //----------------------------------------------------------------------------------
-#pragma once
 #import <Foundation/Foundation.h>
+#import "CEffectEx.h"
 #import "CRect.h"
 
 #define LEF_DISPLAYNAME 0x0001
@@ -49,8 +49,9 @@
 @class CSprite;
 @class CTransitionData;
 @class CTrans;
+@class CEffectEx;
 
-@interface CRunFrame : NSObject 
+@interface CRunFrame : NSObject
 {
 @public
     CRunApp* app;
@@ -107,7 +108,22 @@
     int dwColMaskBits;
     CColMask* colMask;
     short m_wRandomSeed;
-    int m_dwMvtTimerBase;	
+    int m_dwMvtTimerBase;
+
+    //Ink Effect
+    int effect;
+    int effectParam;
+
+    int effectIndex;
+    int effectNParams;
+    int* effectData;
+
+    int effectShader;
+    CEffectEx* effectEx;
+    bool hasFrameEffect;
+    bool hasLayerEffects;
+
+    int numberOfIndexedFastLoops;
 }
 
 -(id)initWithApp:(CRunApp*)pApp;
@@ -115,15 +131,23 @@
 -(void)clearSprites;
 -(BOOL)loadFullFrame:(int)index;
 -(void)loadLayers;
+-(void)loadLayerEffects;
+-(void)checkLayerEffects;
+-(void)createFrameEffect;
+//-(void)createEffect;
+-(int)checkOrCreateEffectIfNeeded:(CRunApp*)app;
+-(int)checkOrCreateEffectIfNeededByIndex:(int)index;
+-(int)checkOrCreateEffectIfNeeded:(CRunApp*)app andName:(NSString*)name;
+-(int)checkOrCreateEffectIfNeededByName:(NSString*)name andEffectParam:(int)rgba;
 -(void)loadHeader;
 -(int)getMaskBits;
 -(BOOL)bkdLevObjCol_TestPoint:(int)x withY:(int)y andLayer:(int)nTestLayer andPlane:(int)nPlane;
 -(BOOL)bkdLevObjCol_TestRect:(int)x withY:(int)y andWidth:(int)nWidth andHeight:(int)nHeight andLayer:(int)nTestLayer andPlane:(int)nPlane;
--(BOOL)bkdLevObjCol_TestSprite:(CSprite*)pSpr withImage:(short)newImg andX:(int)newX andY:(int)newY andAngle:(float)newAngle andScaleX:(float)newScaleX andScaleY:(float)newScaleY andFoot:(int)subHt andPlane:(int)nPlane;
+-(BOOL)bkdLevObjCol_TestSprite:(CSprite*)pSpr withImage:(unsigned short)newImg andX:(int)newX andY:(int)newY andAngle:(float)newAngle andScaleX:(float)newScaleX andScaleY:(float)newScaleY andFoot:(int)subHt andPlane:(int)nPlane;
 -(BOOL)bkdCol_TestPoint:(int)x withY:(int)y andLayer:(int)nLayer andPlane:(int)nPlane;
 -(BOOL)bkdCol_TestRect:(int) x withY:(int)y andWidth:(int)nWidth andHeight:(int)nHeight andLayer:(int)nLayer andPlane:(int)nPlane;
--(BOOL)bkdCol_TestSprite:(CSprite*)pSpr withImage:(int)newImg andX:(int)newX andY:(int)newY andAngle:(float)newAngle andScaleX:(float)newScaleX andScaleY:(float)newScaleY andFoot:(int)subHt andPlane:(int)nPlane;
--(BOOL)colMask_TestSprite:(CSprite*)pSpr withImage:(int)newImg andX:(int)newX andY:(int)newY andAngle:(float)newAngle andScaleX:(float)newScaleX andScaleY:(float)newScaleY andFoot:(int)subHt andPlane:(int)nPlane;
+-(BOOL)bkdCol_TestSprite:(CSprite*)pSpr withImage:(unsigned short)newImg andX:(int)newX andY:(int)newY andAngle:(float)newAngle andScaleX:(float)newScaleX andScaleY:(float)newScaleY andFoot:(int)subHt andPlane:(int)nPlane;
+-(BOOL)colMask_TestSprite:(CSprite*)pSpr withImage:(unsigned short)newImg andX:(int)newX andY:(int)newY andAngle:(float)newAngle andScaleX:(float)newScaleX andScaleY:(float)newScaleY andFoot:(int)subHt andPlane:(int)nPlane;
 
 -(NSString*)description;
 
