@@ -679,12 +679,12 @@ bool Extension::LoadModule(duk_context* ctx, const std::string& resolvedPath, co
                 return false;
         }
 
-        duk_pop(ctx); // pop return value
-        duk_dup(ctx, 0); // exportsCopy
-        duk_put_prop_string(ctx, 2, resolvedPath.c_str()); // cache at index 2 after pop?
-        duk_remove(ctx, 2); // remove cache
-        duk_set_top(ctx, 1); // keep exports only
-        return true;
+	duk_pop(ctx); // pop return value
+	duk_dup(ctx, 0); // exportsCopy
+	duk_put_prop_string(ctx, 1, resolvedPath.c_str()); // cache[resolvedPath] = exports
+	duk_remove(ctx, 1); // remove cache
+	duk_set_top(ctx, 1); // keep exports only
+	return true;
 }
 
 duk_ret_t Extension::JS_Require(duk_context* ctx)
