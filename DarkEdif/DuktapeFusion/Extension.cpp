@@ -120,27 +120,29 @@ duk_context* Extension::CreateContextWithHelpers()
         if (!ctx)
                 return nullptr;
 
+        static const char* kExtPtrKey = "__fusion_ext";
+
         duk_push_global_object(ctx);
         duk_push_object(ctx);
         duk_push_c_function(ctx, JS_ListObjects, 1);
         duk_push_pointer(ctx, this);
-        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, kExtPtrKey);
         duk_put_prop_string(ctx, -2, "listObjects");
         duk_push_c_function(ctx, JS_GetPosition, 1);
         duk_push_pointer(ctx, this);
-        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, kExtPtrKey);
         duk_put_prop_string(ctx, -2, "getPos");
         duk_push_c_function(ctx, JS_SetPosition, 3);
         duk_push_pointer(ctx, this);
-        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, kExtPtrKey);
         duk_put_prop_string(ctx, -2, "setPos");
         duk_push_c_function(ctx, JS_GetAltValue, 2);
         duk_push_pointer(ctx, this);
-        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, kExtPtrKey);
         duk_put_prop_string(ctx, -2, "getAltValue");
         duk_push_c_function(ctx, JS_SetAltValue, 3);
         duk_push_pointer(ctx, this);
-        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, kExtPtrKey);
         duk_put_prop_string(ctx, -2, "setAltValue");
         duk_put_prop_string(ctx, -2, "fusion");
         // module cache placeholder
@@ -335,7 +337,7 @@ long Extension::UnlinkedExpression(int ID)
 duk_ret_t Extension::JS_ListObjects(duk_context* ctx)
 {
         duk_push_current_function(ctx);
-        duk_get_prop_string(ctx, -1, "\xff\xffext");
+        duk_get_prop_string(ctx, -1, "__fusion_ext");
         Extension* ext = (Extension*)duk_get_pointer(ctx, -1);
         duk_pop_2(ctx);
         int oi = (int)duk_require_int(ctx, 0);
@@ -352,7 +354,7 @@ duk_ret_t Extension::JS_ListObjects(duk_context* ctx)
 duk_ret_t Extension::JS_GetPosition(duk_context* ctx)
 {
         duk_push_current_function(ctx);
-        duk_get_prop_string(ctx, -1, "\xff\xffext");
+        duk_get_prop_string(ctx, -1, "__fusion_ext");
         Extension* ext = (Extension*)duk_get_pointer(ctx, -1);
         duk_pop_2(ctx);
         int fv = (int)duk_require_int(ctx, 0);
@@ -370,7 +372,7 @@ duk_ret_t Extension::JS_GetPosition(duk_context* ctx)
 duk_ret_t Extension::JS_SetPosition(duk_context* ctx)
 {
         duk_push_current_function(ctx);
-        duk_get_prop_string(ctx, -1, "\xff\xffext");
+        duk_get_prop_string(ctx, -1, "__fusion_ext");
         Extension* ext = (Extension*)duk_get_pointer(ctx, -1);
         duk_pop_2(ctx);
         int fv = (int)duk_require_int(ctx, 0);
@@ -382,15 +384,13 @@ duk_ret_t Extension::JS_SetPosition(duk_context* ctx)
         HeaderObject* ho = ro->get_rHo();
         ho->X = x;
         ho->Y = y;
-        if (ro->get_roc())
-                ro->get_roc()->rcChanged = true;
         return 0;
 }
 
 duk_ret_t Extension::JS_GetAltValue(duk_context* ctx)
 {
         duk_push_current_function(ctx);
-        duk_get_prop_string(ctx, -1, "\xff\xffext");
+        duk_get_prop_string(ctx, -1, "__fusion_ext");
         Extension* ext = (Extension*)duk_get_pointer(ctx, -1);
         duk_pop_2(ctx);
         int fv = (int)duk_require_int(ctx, 0);
@@ -423,7 +423,7 @@ duk_ret_t Extension::JS_GetAltValue(duk_context* ctx)
 duk_ret_t Extension::JS_SetAltValue(duk_context* ctx)
 {
         duk_push_current_function(ctx);
-        duk_get_prop_string(ctx, -1, "\xff\xffext");
+        duk_get_prop_string(ctx, -1, "__fusion_ext");
         Extension* ext = (Extension*)duk_get_pointer(ctx, -1);
         duk_pop_2(ctx);
         int fv = (int)duk_require_int(ctx, 0);
@@ -612,9 +612,9 @@ void Extension::PushRequireFunction(duk_context* ctx, const std::string& baseDir
 {
         duk_push_c_function(ctx, JS_Require, 1);
         duk_push_pointer(ctx, this);
-        duk_put_prop_string(ctx, -2, "\xff\xffext");
+        duk_put_prop_string(ctx, -2, "__fusion_ext");
         duk_push_string(ctx, baseDir.c_str());
-        duk_put_prop_string(ctx, -2, "\xff\xffbasedir");
+        duk_put_prop_string(ctx, -2, "__fusion_basedir");
 }
 
 bool Extension::LoadModule(duk_context* ctx, const std::string& resolvedPath, const std::string& baseDir)
@@ -692,10 +692,10 @@ duk_ret_t Extension::JS_Require(duk_context* ctx)
         const char* spec = duk_require_string(ctx, 0);
 
         duk_push_current_function(ctx);
-        duk_get_prop_string(ctx, -1, "\xff\xffext");
+        duk_get_prop_string(ctx, -1, "__fusion_ext");
         Extension* ext = (Extension*)duk_get_pointer(ctx, -1);
         duk_pop(ctx);
-        duk_get_prop_string(ctx, -1, "\xff\xffbasedir");
+        duk_get_prop_string(ctx, -1, "__fusion_basedir");
         std::string baseDir = duk_is_string(ctx, -1) ? duk_get_string(ctx, -1) : "";
         duk_pop_2(ctx);
 
