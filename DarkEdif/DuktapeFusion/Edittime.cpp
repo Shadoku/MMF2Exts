@@ -52,6 +52,10 @@ void FusionAPI EditorDisplay(mv *mV, ObjectInfo * oiPtr, LevelObject * loPtr, ED
     Edif::SDK->Icon->Blit(*Surface, rc->left, rc->top, BMODE_TRANSP, BOP_COPY, 0);
 }
 
+// ============================================================================
+// PROPERTIES
+// ============================================================================
+
 // Inserts properties into the properties of the object.
 BOOL FusionAPI GetProperties(mv * mV, EDITDATA * edPtr, BOOL bMasterItem)
 {
@@ -63,168 +67,43 @@ BOOL FusionAPI GetProperties(mv * mV, EDITDATA * edPtr, BOOL bMasterItem)
 void FusionAPI ReleaseProperties(mv * mV, EDITDATA * edPtr, BOOL bMasterItem)
 {
 #pragma DllExportHint
-    DarkEdif::DLL::DLL_ReleaseProperties(mV, edPtr, bMasterItem);
+    return DarkEdif::DLL::DLL_ReleaseProperties(mV, edPtr, bMasterItem);
 }
 
-// When the object is removed from the frame editor, this is called to clean up
-void FusionAPI RemoveObject(mv * mV, EDITDATA * edPtr, int code, BOOL bMasterItem)
+// Returns the value of properties that have a value.
+// Note: see GetPropCheck for checkbox properties
+void * FusionAPI GetPropValue(mv * mV, EDITDATA * edPtr, unsigned int PropID)
 {
 #pragma DllExportHint
-    DarkEdif::DLL::DLL_RemoveObject(mV, edPtr, code, bMasterItem);
+    return DarkEdif::DLL::DLL_GetPropValue(mV, edPtr, PropID);
 }
 
-// Called when Fusion copies your object during runtime (animation list, others)
-// Use to deep-copy if your EDITDATA struct holds dynamic allocated data.
-void FusionAPI DuplicateObject(mv * mV, EDITDATA * destEdPtr, EDITDATA * sourceEdPtr)
+// Returns the checked state of properties that have a check box.
+BOOL FusionAPI GetPropCheck(mv * mV, EDITDATA * edPtr, unsigned int PropID)
 {
 #pragma DllExportHint
-    DarkEdif::DLL::DLL_DuplicateObject(mV, destEdPtr, sourceEdPtr);
+	return DarkEdif::DLL::DLL_GetPropCheck(mV, edPtr, PropID);
+}
+
+// Called by Fusion after a property has been modified.
+void FusionAPI SetPropValue(mv * mV, EDITDATA * edPtr, unsigned int PropID, void * Param)
+{
+#pragma DllExportHint
+    DarkEdif::DLL::DLL_SetPropValue(mV, edPtr, PropID, Param);
+}
+
+// Called by Fusion when the user modifies a checkbox in the properties.
+void FusionAPI SetPropCheck(mv * mV, EDITDATA * edPtr, unsigned int PropID, BOOL checked)
+{
+#pragma DllExportHint
+    DarkEdif::DLL::DLL_SetPropCheck(mV, edPtr, PropID, checked);
+}
+
+// Called by Fusion to request the enabled state of a property.
+BOOL FusionAPI IsPropEnabled(mv * mV, EDITDATA * edPtr, unsigned int PropID)
+{
+#pragma DllExportHint
+    return DarkEdif::DLL::DLL_IsPropEnabled(mV, edPtr, PropID);
 }
 
 #endif // EditorBuild
-
-// ============================================================================
-// GENERAL ROUTINES
-// ============================================================================
-
-void FusionAPI GetObjInfos(mv * mV, EDITDATA * edPtr, tagObjInfo * oiPtr)
-{
-#pragma DllExportHint
-    DarkEdif::DLL::DLL_GetObjInfos(mV, edPtr, oiPtr);
-}
-
-#ifdef _WIN32
-BOOL FusionAPI GetRunObjectData(mv * mV, LevelObject * loPtr, EDITDATA * edPtr, void *file, int size)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_GetRunObjectData(mV, loPtr, edPtr, file, size);
-}
-#endif
-
-BOOL FusionAPI PutRunObjectData(mv * mV, EDITDATA * edPtr, void *file, int *psize)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_PutRunObjectData(mV, edPtr, file, psize);
-}
-
-int FusionAPI GetRID(ID * pID)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_GetRID(pID);
-}
-
-HGLOBAL FusionAPI Malloc(DWORD dwBytes)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_Malloc(dwBytes);
-}
-
-int FusionAPI Free(HGLOBAL hMem)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_Free(hMem);
-}
-
-long FusionAPI GetRunObjectInfos(mv * mV, EDITDATA * edPtr, fpcob cobPtr)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_GetRunObjectInfos(mV, edPtr, cobPtr);
-}
-
-void FusionAPI enumStorage(mv * mV, fpcob cobPtr, void (FusionAPI * cb)(mv*, fpcob, LPSTR, int, int))
-{
-#pragma DllExportHint
-    DarkEdif::DLL::DLL_enumStorage(mV, cobPtr, cb);
-}
-
-long FusionAPI LoadObject(mv * mV, EDITDATA * edPtr, fpcob cobPtr, int version)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_LoadObject(mV, edPtr, cobPtr, version);
-}
-
-// ============================================================================
-// UNICODE SUPPORT
-// ============================================================================
-
-int FusionAPI Initialize(mv * mV)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_Initialize(mV);
-}
-
-#ifdef _WIN32
-int FusionAPI UpdateEditStructure(mv * mV, void * OldEdPtr, void * NewEdPtr)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_UpdateEditStructure(mV, OldEdPtr, NewEdPtr);
-}
-#endif
-
-int FusionAPI GetRegNo(mv * mV)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_GetRegNo(mV);
-}
-
-const TCHAR * FusionAPI GetHelpFileName()
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_GetHelpFileName();
-}
-
-// Called when Edif uses ICEx to add ACEs
-void FusionAPI AddToToolbarList(mv * mV, short col, LPCSTR text, LPCSTR tooltip)
-{
-#pragma DllExportHint
-    DarkEdif::DLL::DLL_AddToToolBarList(mV, col, text, tooltip);
-}
-
-#ifdef _WIN32
-BOOL FusionAPI IsToolBarSupported()
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_IsToolBarSupported();
-}
-#endif
-
-void FusionAPI ReleaseToolbar(mv * mV, void * Buffer)
-{
-#pragma DllExportHint
-    DarkEdif::DLL::DLL_ReleaseToolBar(mV, Buffer);
-}
-
-// Called after editing the menu
-void FusionAPI MenuEditorDisplay(mv * mV, EDITDATA * edPtr, void * Base, RECT * rc, long colEdit, long colSel)
-{
-#pragma DllExportHint
-    DarkEdif::DLL::DLL_MenuEditorDisplay(mV, edPtr, Base, rc, colEdit, colSel);
-}
-
-#ifdef _WIN32
-void FusionAPI GetPopupMenuPos(EDITDATA* edPtr, POINT* pt)
-{
-#pragma DllExportHint
-    DarkEdif::DLL::DLL_GetPopupMenuPos(edPtr, pt);
-}
-#endif
-
-void FusionAPI UpdatePopupMenu(EDITDATA* edPtr, HMENU* pMenu)
-{
-#pragma DllExportHint
-    DarkEdif::DLL::DLL_UpdatePopupMenu(edPtr, pMenu);
-}
-
-BOOL FusionAPI CreateFromFile(mv * mV, LPCSTR fileName, EDITDATA * edPtr)
-{
-#pragma DllExportHint
-    return DarkEdif::DLL::DLL_CreateFromFile(mV, fileName, edPtr);
-}
-
-void FusionAPI EditorFlatStructure(mv * mV, EDITDATA * edPtr, LPSTR Buffer, int* nSize, BOOL Unicode)
-{
-#pragma DllExportHint
-    DarkEdif::DLL::DLL_EditorFlatStructure(mV, edPtr, Buffer, nSize, Unicode);
-}
-
-#endif

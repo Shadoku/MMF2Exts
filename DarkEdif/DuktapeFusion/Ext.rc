@@ -152,6 +152,8 @@ END
 // If editor, DarkExt.json is used, otherwise DarkExt.PostMinify.json,
 // which is created by DarkEdifPreBuildTool minifying DarkExt.json.
 
+IDR_EDIF_ICON	Edif	"..\\DarkScript\\Icon.png"
+
 #if EditorBuild
 #if !defined(DARKEXT_JSON_FILE_EXTERNAL)
 IDR_EDIF_JSON	Edif	"DarkExt.json"
