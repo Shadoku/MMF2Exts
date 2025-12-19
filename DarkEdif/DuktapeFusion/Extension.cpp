@@ -1,6 +1,8 @@
 #include "Common.hpp"
 #include <fstream>
 #include <sstream>
+#include <iomanip>
+#include <cstdio>
 
 ///
 /// EXTENSION CONSTRUCTOR/DESTRUCTOR
@@ -18,6 +20,7 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
 	objCExtPtr(objCExtPtr), Runtime(this, objCExtPtr), FusionDebugger(this)
 #endif
 {
+        DebugTrace("Extension ctor: begin");
 	/*
 		Link all your action/condition/expression functions to their IDs to match the
 		IDs in the JSON here
@@ -63,7 +66,9 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
         );
 
         // create first context
+        DebugTraceContextState("Extension ctor: before NewContext");
         NewContext();
+        DebugTraceContextState("Extension ctor: after NewContext");
 
 
 
@@ -79,46 +84,76 @@ Extension::Extension(const EDITDATA* const edPtr, void* const objCExtPtr) :
 
 Extension::~Extension()
 {
+        DebugTrace("Extension dtor: begin");
         for (auto& entry : registeredScripts)
                 ClearScriptReference(entry.second);
         registeredScripts.clear();
         for (auto ctx : contexts)
                 duk_destroy_heap(ctx);
+        DebugTrace("Extension dtor: finished");
 }
 
 bool Extension::EnsureCurrentContext()
 {
+        DebugTraceContextState("EnsureCurrentContext: entry");
         auto hasCtx = [this](int idx) -> bool {
                 return idx >= 0 && idx < (int)contexts.size() && contexts[idx] != nullptr;
         };
 
+        if (currentCtx < 0 || currentCtx >= (int)contexts.size())
+        {
+                DebugTrace("EnsureCurrentContext: clamping currentCtx to 0");
+                currentCtx = 0;
+        }
+
         if (hasCtx(currentCtx))
+        {
+                DebugTraceContextState("EnsureCurrentContext: current valid");
                 return true;
+        }
 
         if (hasCtx(0))
         {
                 currentCtx = 0;
+                DebugTrace("EnsureCurrentContext: fell back to context 0");
                 return true;
         }
 
         if (!contexts.empty())
         {
                 // slot exists but the heap was destroyed; rebuild the shared context
+                DebugTrace("EnsureCurrentContext: attempting rebuild of context 0");
                 if (RebuildContext(0))
                 {
                         currentCtx = 0;
+                        DebugTraceContextState("EnsureCurrentContext: rebuild succeeded");
                         return true;
                 }
+                DebugTrace("EnsureCurrentContext: rebuild failed");
         }
 
-        return NewContext() >= 0;
+        int newCtx = NewContext();
+        if (newCtx < 0)
+        {
+                DebugTrace("EnsureCurrentContext: NewContext failed, clearing currentCtx");
+                currentCtx = -1;
+                return false;
+        }
+
+        currentCtx = newCtx;
+        DebugTraceContextState("EnsureCurrentContext: created new context");
+        return true;
 }
 
 duk_context* Extension::CreateContextWithHelpers()
 {
+        DebugTrace("CreateContextWithHelpers: creating heap");
         duk_context* ctx = duk_create_heap_default();
         if (!ctx)
+        {
+                DebugTrace("CreateContextWithHelpers: heap creation failed");
                 return nullptr;
+        }
 
         static const char* kExtPtrKey = "__fusion_ext";
 
@@ -155,11 +190,17 @@ duk_context* Extension::CreateContextWithHelpers()
         duk_put_global_string(ctx, "require");
         duk_pop(ctx);
 
+        std::ostringstream ss;
+        ss << "CreateContextWithHelpers: heap=" << ctx;
+        DebugTrace(ss.str());
         return ctx;
 }
 
 bool Extension::RebuildContext(int ctxId)
 {
+        std::ostringstream ss;
+        ss << "RebuildContext: ctxId=" << ctxId << " size=" << contexts.size();
+        DebugTrace(ss.str());
         if (ctxId < 0)
                 return false;
 
@@ -172,7 +213,10 @@ bool Extension::RebuildContext(int ctxId)
 
         duk_context* newCtx = CreateContextWithHelpers();
         if (!newCtx)
+        {
+                DebugTrace("RebuildContext: CreateContextWithHelpers failed");
                 return false;
+        }
 
         // Destroy any extra contexts so we keep one shared heap around.
         for (size_t i = 0; i < contexts.size(); ++i)
@@ -188,7 +232,10 @@ bool Extension::RebuildContext(int ctxId)
         contexts.resize((size_t)ctxId + 1, nullptr);
 
         if (contexts[ctxId])
+        {
+                DebugTrace("RebuildContext: destroying existing heap in target slot");
                 duk_destroy_heap(contexts[ctxId]);
+        }
 
         contexts[ctxId] = newCtx;
         registeredScripts.clear();
@@ -211,7 +258,33 @@ bool Extension::RebuildContext(int ctxId)
         if (needsHandle)
                 Runtime.Rehandle();
 
+        DebugTraceContextState("RebuildContext: complete");
         return true;
+}
+
+void Extension::DebugTrace(const std::string& message) const
+{
+        std::string line = "[DuktapeFusion] " + message;
+#ifdef _WIN32
+        line.push_back('\n');
+        OutputDebugStringA(line.c_str());
+#else
+        std::fprintf(stderr, "%s\n", line.c_str());
+#endif
+}
+
+void Extension::DebugTraceContextState(const char* stage) const
+{
+        std::ostringstream ss;
+        ss << "ContextState";
+        if (stage && stage[0])
+                ss << " (" << stage << ")";
+        ss << ": currentCtx=" << currentCtx << " total=" << contexts.size();
+        for (size_t i = 0; i < contexts.size(); ++i)
+        {
+                ss << " [" << i << ":" << (contexts[i] ? "ok" : "null") << "]";
+        }
+        DebugTrace(ss.str());
 }
 
 
@@ -747,7 +820,9 @@ bool Extension::CacheObjectScript(int fixedValue, RunObjectMultiPlatPtr obj, int
         std::string scriptUTF8 = DarkEdif::TStringToUTF8(rawScript);
         std::string wrapper = "(function(meta){\n" + scriptUTF8 + "\n})";
 
-        duk_context* ctx = contexts[currentCtx];
+        duk_context* ctx = (currentCtx >= 0 && currentCtx < (int)contexts.size()) ? contexts[currentCtx] : nullptr;
+        if (!ctx)
+                return false;
         if (duk_pcompile_lstring(ctx, DUK_COMPILE_FUNCTION, wrapper.c_str(), wrapper.size()) != 0)
         {
                 const char* err = duk_safe_to_string(ctx, -1);
