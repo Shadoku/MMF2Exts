@@ -10,10 +10,16 @@
         },
         "ActionMenu": [
             [0, "Run JS Script"],
-            [1, "Set Context"]
+            [1, "Set Context"],
+            [2, "Register object script"],
+            [3, "Unregister object script"],
+            [4, "Invoke registered script"],
+            [5, "Run script file"],
+            [6, "Set module root"]
         ],
         "ConditionMenu": [
-            [0, "Dummy condition"]
+            [0, "Dummy condition"],
+            [1, "Is object registered?"]
         ],
         "ExpressionMenu": [
             [0, "Eval$"],
@@ -21,10 +27,16 @@
         ],
         "Actions": [
             { "Title": "Run(%0)", "Parameters": [["Text", "Code"]] },
-            { "Title": "SetContext(%0)", "Parameters": [["Integer", "Context ID"]] }
+            { "Title": "SetContext(%0)", "Parameters": [["Integer", "Context ID"]] },
+            { "Title": "RegisterScript(%0,%1,%2)", "Parameters": [["Integer", "Fixed value"], ["Integer", "Alterable string index"], ["Integer", "Run every frame (1/0)"]] },
+            { "Title": "UnregisterScript(%0)", "Parameters": [["Integer", "Fixed value"]] },
+            { "Title": "InvokeScript(%0)", "Parameters": [["Integer", "Fixed value"]] },
+            { "Title": "RunFile(%0)", "Parameters": [["Text", "Script path"]] },
+            { "Title": "SetModuleRoot(%0)", "Parameters": [["Text", "Root directory for require()"]] }
         ],
         "Conditions": [
-            { "Title": "DummyCondition", "Triggered": false }
+            { "Title": "DummyCondition", "Triggered": false },
+            { "Title": "IsRegistered(%0)", "Triggered": false, "Parameters": [["Integer", "Fixed value"]] }
         ],
         "Expressions": [
             { "Title": "Eval$(", "Returns": "Text", "Parameters": [["Text", "Expression"]] },

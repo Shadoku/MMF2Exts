@@ -135,6 +135,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DarkScript.iOS", "DarkEdif\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DarkScript.Android", "DarkEdif\DarkScript\DarkScript.Android.vcxproj", "{2AB2CF38-C822-4466-83F1-598576F3749D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DuktapeFusion", "DuktapeFusion", "{2CB5B389-AD3F-493A-BDA5-4E6B6C0F3723}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DuktapeFusion.Shared", "DarkEdif\DuktapeFusion\DuktapeFusion.Shared.vcxitems", "{E74B5900-1A4E-4180-AE44-F5A53372407C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DuktapeFusion.Windows", "DarkEdif\DuktapeFusion\DuktapeFusion.Windows.vcxproj", "{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DarkEdif Template.Mac", "DarkEdif\DarkEdif Template\DarkEdif Template.Mac.vcxproj", "{1BD1B0D9-6BE0-4564-9902-C4E32C9C4102}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bluewing Client.Mac", "DarkEdif\Bluewing Client\Bluewing Client.Mac.vcxproj", "{7B54CA9A-1C70-4021-B9E4-61CC9687ABBF}"
@@ -163,10 +169,11 @@ Global
 		DarkEdif\Bluewing Server\Bluewing Server.Shared.vcxitems*{c816ed6f-7494-49e5-b52c-be97d6f6ba8b}*SharedItemsImports = 4
 		DarkEdif\DarkScript\DarkScript.Shared.vcxitems*{e61d528c-5125-4fdc-99c7-8c32855824e7}*SharedItemsImports = 4
 		DarkEdif\Bluewing Client\Bluewing Client.Shared.vcxitems*{e9e3e2b9-db19-45ca-90a5-de930c241b1a}*SharedItemsImports = 4
-		DarkEdif\DarkScript\DarkScript.Shared.vcxitems*{f0c71ec3-bdad-47d2-8fe8-43847eee2a6f}*SharedItemsImports = 9
-		DarkEdif\Bluewing Server\Bluewing Server.Shared.vcxitems*{f988ac50-8d68-49c3-a1dd-d58f2a0a6873}*SharedItemsImports = 4
-	EndGlobalSection
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+	DarkEdif\DarkScript\DarkScript.Shared.vcxitems*{f0c71ec3-bdad-47d2-8fe8-43847eee2a6f}*SharedItemsImports = 9
+	DarkEdif\Bluewing Server\Bluewing Server.Shared.vcxitems*{f988ac50-8d68-49c3-a1dd-d58f2a0a6873}*SharedItemsImports = 4
+	DarkEdif\DuktapeFusion\DuktapeFusion.Shared.vcxitems*{c3b6618a-29ac-405d-a19c-0b5096ac8d1d}*SharedItemsImports = 4
+EndGlobalSection
+GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Unicode|ARM = Debug Unicode|ARM
 		Debug Unicode|ARM64 = Debug Unicode|ARM64
 		Debug Unicode|Win32 = Debug Unicode|Win32
@@ -2249,6 +2256,60 @@ Global
 		{74C480DD-1B94-4A15-A715-F6657B88A121}.Vitalize|Win32.Build.0 = Runtime|Win32
 		{74C480DD-1B94-4A15-A715-F6657B88A121}.Vitalize|x64.ActiveCfg = Runtime|Win32
 		{74C480DD-1B94-4A15-A715-F6657B88A121}.Vitalize|x64.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|ARM.ActiveCfg = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|ARM64.ActiveCfg = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|Win32.ActiveCfg = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|Win32.Build.0 = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|x64.ActiveCfg = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|ARM.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|Win32.Build.0 = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|x64.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|ARM.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|ARM.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|ARM64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|ARM64.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|Win32.ActiveCfg = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|Win32.Build.0 = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|x64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|x64.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|ARM.ActiveCfg = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|ARM64.ActiveCfg = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|Win32.ActiveCfg = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|Win32.Build.0 = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|x64.ActiveCfg = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|ARM.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|ARM64.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|Win32.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|Win32.Build.0 = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|x64.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|ARM.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|ARM.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|ARM64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|ARM64.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|Win32.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|Win32.Build.0 = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|x64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|x64.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|ARM.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|ARM64.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|Win32.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|Win32.Build.0 = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|x64.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|ARM.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|ARM64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|Win32.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|Win32.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|x64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|ARM.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|ARM.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|ARM64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|ARM64.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|Win32.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|Win32.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|x64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|x64.Build.0 = Runtime|Win32
 		{E61D528C-5125-4FDC-99C7-8C32855824E7}.Debug Unicode|ARM.ActiveCfg = Debug|ARM
 		{E61D528C-5125-4FDC-99C7-8C32855824E7}.Debug Unicode|ARM.Build.0 = Debug|ARM
 		{E61D528C-5125-4FDC-99C7-8C32855824E7}.Debug Unicode|ARM64.ActiveCfg = Debug|ARM64
@@ -2735,6 +2796,9 @@ Global
 		{7B54CA9A-1C70-4021-B9E4-61CC9687ABBF} = {A42E3F14-A67F-4BDC-95BF-91AC488F2402}
 		{73B8D97A-E5AE-4895-B965-0B907B3E7914} = {7D85C17B-6394-47A2-A753-912C004B1322}
 		{9A9869B8-3D71-4AA2-9CAF-99C94EC2C265} = {9772634F-73F4-4896-8586-2F11686D8192}
+		{E74B5900-1A4E-4180-AE44-F5A53372407C} = {2CB5B389-AD3F-493A-BDA5-4E6B6C0F3723}
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D} = {2CB5B389-AD3F-493A-BDA5-4E6B6C0F3723}
+		{2CB5B389-AD3F-493A-BDA5-4E6B6C0F3723} = {87FCF6C1-4A5E-4FE2-9598-70624C1B8E66}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {45C892FB-FEE7-4CAA-B5CA-CAB83E06D99B}

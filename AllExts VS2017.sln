@@ -55,6 +55,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DarkSocket", "DarkEdif\Dark
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DebugObject", "DarkEdif\DebugObject\DebugObject.vcxproj", "{6DD44589-56A5-4DAE-ABA8-E6D4CA42AA4B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DuktapeFusion.Shared", "DarkEdif\DuktapeFusion\DuktapeFusion.Shared.vcxitems", "{E74B5900-1A4E-4180-AE44-F5A53372407C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DuktapeFusion.Windows", "DarkEdif\DuktapeFusion\DuktapeFusion.Windows.vcxproj", "{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DarkEdif", "DarkEdif", "{87FCF6C1-4A5E-4FE2-9598-70624C1B8E66}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Edif", "Edif", "{31D60C88-6D3D-43F6-9324-AC664458114B}"
@@ -121,14 +125,15 @@ Global
 		DarkEdif\DarkEdif Template\DarkEdif Template.Shared.vcxitems*{1ba4daf2-407f-457c-917b-ee67d3ee7fb5}*SharedItemsImports = 4
 		DarkEdif\Bluewing Server\Bluewing Server.Shared.vcxitems*{235d1e71-5acd-40ea-907e-017b94533b42}*SharedItemsImports = 9
 		DarkEdif\Bluewing Client\Bluewing Client.Shared.vcxitems*{261247d3-23dc-41b1-a8b5-bbebfec4a09c}*SharedItemsImports = 9
-		DarkEdif\Bluewing Client\Bluewing Client.Shared.vcxitems*{7bc7f91b-80e1-4f73-8a95-480962eb4e06}*SharedItemsImports = 4
-		DarkEdif\DarkEdif Template\DarkEdif Template.Shared.vcxitems*{8002a7ce-24a0-4994-bda4-2b208fa7d7c5}*SharedItemsImports = 9
-		DarkEdif\DarkEdif Template\DarkEdif Template.Shared.vcxitems*{8d71cd83-be30-4b0f-802e-9629805a663a}*SharedItemsImports = 4
-		DarkEdif\Bluewing Server\Bluewing Server.Shared.vcxitems*{c816ed6f-7494-49e5-b52c-be97d6f6ba8b}*SharedItemsImports = 4
-		DarkEdif\Bluewing Client\Bluewing Client.Shared.vcxitems*{e9e3e2b9-db19-45ca-90a5-de930c241b1a}*SharedItemsImports = 4
-		DarkEdif\Bluewing Server\Bluewing Server.Shared.vcxitems*{f988ac50-8d68-49c3-a1dd-d58f2a0a6873}*SharedItemsImports = 4
-	EndGlobalSection
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+	DarkEdif\Bluewing Client\Bluewing Client.Shared.vcxitems*{7bc7f91b-80e1-4f73-8a95-480962eb4e06}*SharedItemsImports = 4
+	DarkEdif\DarkEdif Template\DarkEdif Template.Shared.vcxitems*{8002a7ce-24a0-4994-bda4-2b208fa7d7c5}*SharedItemsImports = 9
+	DarkEdif\DarkEdif Template\DarkEdif Template.Shared.vcxitems*{8d71cd83-be30-4b0f-802e-9629805a663a}*SharedItemsImports = 4
+	DarkEdif\Bluewing Server\Bluewing Server.Shared.vcxitems*{c816ed6f-7494-49e5-b52c-be97d6f6ba8b}*SharedItemsImports = 4
+	DarkEdif\Bluewing Client\Bluewing Client.Shared.vcxitems*{e9e3e2b9-db19-45ca-90a5-de930c241b1a}*SharedItemsImports = 4
+	DarkEdif\Bluewing Server\Bluewing Server.Shared.vcxitems*{f988ac50-8d68-49c3-a1dd-d58f2a0a6873}*SharedItemsImports = 4
+	DarkEdif\DuktapeFusion\DuktapeFusion.Shared.vcxitems*{c3b6618a-29ac-405d-a19c-0b5096ac8d1d}*SharedItemsImports = 4
+EndGlobalSection
+GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Unicode|ARM = Debug Unicode|ARM
 		Debug Unicode|ARM64 = Debug Unicode|ARM64
 		Debug Unicode|Win32 = Debug Unicode|Win32
@@ -1222,6 +1227,48 @@ Global
 		{6DD44589-56A5-4DAE-ABA8-E6D4CA42AA4B}.Vitalize|ARM64.ActiveCfg = Runtime|Win32
 		{6DD44589-56A5-4DAE-ABA8-E6D4CA42AA4B}.Vitalize|Win32.ActiveCfg = Debug|Win32
 		{6DD44589-56A5-4DAE-ABA8-E6D4CA42AA4B}.Vitalize|x64.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|ARM.ActiveCfg = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|ARM64.ActiveCfg = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|Win32.ActiveCfg = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|Win32.Build.0 = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug Unicode|x64.ActiveCfg = Debug Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|ARM.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|Win32.Build.0 = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Debug|x64.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|ARM.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|ARM64.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|Win32.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime French|x64.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|ARM.ActiveCfg = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|ARM64.ActiveCfg = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|Win32.ActiveCfg = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|Win32.Build.0 = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime Unicode|x64.ActiveCfg = Edittime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|ARM.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|ARM64.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|Win32.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|Win32.Build.0 = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Edittime|x64.ActiveCfg = Edittime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|ARM.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|ARM64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|Win32.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime French|x64.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|ARM.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|ARM64.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|Win32.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|Win32.Build.0 = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime Unicode|x64.ActiveCfg = Runtime Unicode|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|ARM.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|ARM64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|Win32.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|Win32.Build.0 = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Runtime|x64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|ARM.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|ARM64.ActiveCfg = Runtime|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|Win32.ActiveCfg = Debug|Win32
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D}.Vitalize|x64.ActiveCfg = Debug|Win32
 		{54B985F0-7598-42E1-9E7F-1D14E888264A}.Debug Unicode|ARM.ActiveCfg = Debug Unicode|Win32
 		{54B985F0-7598-42E1-9E7F-1D14E888264A}.Debug Unicode|ARM64.ActiveCfg = Debug Unicode|Win32
 		{54B985F0-7598-42E1-9E7F-1D14E888264A}.Debug Unicode|Win32.ActiveCfg = Debug Unicode|Win32
@@ -2192,6 +2239,8 @@ Global
 		{5008B7E6-93D0-451B-9AC9-EB15E162BAE2} = {31D60C88-6D3D-43F6-9324-AC664458114B}
 		{8E7ED999-9DC0-4957-8ED3-834E2E1C5F66} = {17463230-4F14-4964-A992-A2E84AC20766}
 		{C5EEEC31-392E-4E07-9E0E-E771FB279172} = {87FCF6C1-4A5E-4FE2-9598-70624C1B8E66}
+		{E74B5900-1A4E-4180-AE44-F5A53372407C} = {87FCF6C1-4A5E-4FE2-9598-70624C1B8E66}
+		{C3B6618A-29AC-405D-A19C-0B5096AC8D1D} = {87FCF6C1-4A5E-4FE2-9598-70624C1B8E66}
 		{1BA4DAF2-407F-457C-917B-EE67D3EE7FB5} = {C5EEEC31-392E-4E07-9E0E-E771FB279172}
 		{8002A7CE-24A0-4994-BDA4-2B208FA7D7C5} = {C5EEEC31-392E-4E07-9E0E-E771FB279172}
 		{8D71CD83-BE30-4B0F-802E-9629805A663A} = {C5EEEC31-392E-4E07-9E0E-E771FB279172}
