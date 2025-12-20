@@ -29,13 +29,13 @@
 			{
 				"Title": "Load and run script file %0",
 				"Parameters": [
-					[ "Editbox String", "Script file path" ]
+					[ "String", "Script file path" ]
 				]
 			},
 			{
 				"Title": "Evaluate JavaScript string %0",
 				"Parameters": [
-					[ "Editbox String", "Inline JavaScript" ]
+					[ "String", "Inline JavaScript" ]
 				]
 			},
 			{
