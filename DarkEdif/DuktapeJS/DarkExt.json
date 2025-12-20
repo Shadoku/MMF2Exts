@@ -1,0 +1,80 @@
+﻿{
+	// 4-character identifer that uniquely identifies your extension.
+	// Can be letters, numbers, or punctuation, but must be 4 ASCII characters.
+	"Identifier": "DKJS",
+	"Dependencies": "",
+	"UK English": {
+		"About": {
+			"Name": "Duktape JavaScript",
+			"Author": "Embedded JS Team",
+			"Comment": "Run Duktape JavaScript from files or strings inside Fusion.",
+			"Copyright": "Copyright \u00A9 2025 by Embedded JS Team",
+			"Help": "",
+			"URL": "https://duktape.org/"
+		},
+		"ActionMenu": [
+			[ 0, "Load and run script file" ],
+			[ 1, "Evaluate JavaScript string" ],
+			[ 2, "Reset context" ]
+		],
+		"ConditionMenu": [
+			[ 0, "Last call succeeded" ],
+			[ 1, "Last call failed" ]
+		],
+		"ExpressionMenu": [
+			[ 0, "Last result as text" ],
+			[ 1, "Last error as text" ]
+		],
+		"Actions": [
+			{
+				"Title": "Load and run script file %0",
+				"Parameters": [
+					[ "Editbox String", "Script file path" ]
+				]
+			},
+			{
+				"Title": "Evaluate JavaScript string %0",
+				"Parameters": [
+					[ "Editbox String", "Inline JavaScript" ]
+				]
+			},
+			{
+				"Title": "Reset the active Duktape context"
+			}
+		],
+		"Conditions": [
+			{
+				"Title": "%o : Last Duktape call succeeded",
+				"Triggered": false
+			},
+			{
+				"Title": "%o : Last Duktape call failed",
+				"Triggered": false
+			}
+		],
+		"Expressions": [
+			{
+				"Title": "LastResult$(",
+				"Returns": "Text"
+			},
+			{
+				"Title": "LastError$(",
+				"Returns": "Text"
+			}
+		],
+		"Properties": [
+			{
+				"Title": "Use isolated context",
+				"Info": "If true, this object uses its own Duktape heap instead of the shared one.",
+				"Type": "Checkbox",
+				"DefaultState": false
+			},
+			{
+				"Title": "Default script directory",
+				"Info": "Base directory used when resolving relative script file paths.",
+				"Type": "Editbox String",
+				"DefaultState": ""
+			}
+		]
+	}
+}
