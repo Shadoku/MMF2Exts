@@ -302,3 +302,20 @@ REFLAG Extension::Handle()
 {
 	return REFLAG::ONE_SHOT;
 }
+
+void Extension::UnlinkedAction(int ID)
+{
+	LOGE(_T("Unlinked action %d called."), ID);
+}
+
+long Extension::UnlinkedCondition(int ID)
+{
+	LOGE(_T("Unlinked condition %d called."), ID);
+	return 0;
+}
+
+long Extension::UnlinkedExpression(int ID)
+{
+	LOGE(_T("Unlinked expression %d called."), ID);
+	return 0;
+}
