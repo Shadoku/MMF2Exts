@@ -5416,7 +5416,11 @@ std::tstring DarkEdif::FontInfoMultiPlat::GetActualFontName() {
 	HWND ourWin = Edif::SDK->mV->RunApp->hEditWin;
 	HDC ourDC = GetDC(ourWin);
 	if (ourDC == NULL)
-		return LOGE(_T("Couldn't get original DC, error %u."), GetLastError()), _T("<error>"s);
+	{
+		const auto logResult = LOGE(_T("Couldn't get original DC, error %u."), GetLastError());
+		(void)logResult;
+		return _T("<error>"s);
+	}
 	HFONT origFont = (HFONT)SelectObject(ourDC, fontHandle);
 	if (origFont == NULL)
 	{
@@ -5432,7 +5436,11 @@ std::tstring DarkEdif::FontInfoMultiPlat::GetActualFontName() {
 	SetThreadLocale(MAKELCID(LGRPID_WESTERN_EUROPE, SORT_DEFAULT));
 	int res = GetTextFace(ourDC, fontName.size(), fontName.data());
 	if (res <= 0)
-		LOGE(_T("Couldn't get true font name, error %u."), GetLastError()), _T("<error>"s);
+	{
+		const auto logResult = LOGE(_T("Couldn't get true font name, error %u."), GetLastError());
+		(void)logResult;
+		return _T("<error>"s);
+	}
 	else
 	{
 		fontName.resize(res - 1); // res includes null
