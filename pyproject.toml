@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=62", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fusionpy_sdk"
+version = "0.1.0"
+description = "Fusion host bridge SDK and CLI"
+authors = [{name = "FusionPy Team", email = "devs@example.com"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.urls]
+Homepage = "https://example.com/fusionpy"
+
+[project.scripts]
+fusionpy = "fusionpy_sdk.cli:main"
+
+[tool.setuptools]
+packages = ["fusionpy_sdk"]
