@@ -1,6 +1,9 @@
 #include "Common.hpp"
 
-bool Extension::AreTwoNumbersEqual(int First, int Second)
+bool Extension::OnJavaScriptError()
 {
-	return First == Second;
+	if (!pendingErrorEvent)
+		return false;
+	pendingErrorEvent = false;
+	return true;
 }
