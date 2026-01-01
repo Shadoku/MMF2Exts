@@ -1,0 +1,153 @@
+{
+        "Identifier": "GRAV",
+        "Dependencies": "",
+        "UK English": {
+                "About": {
+                        "Name": "Gravity Simulator",
+                        "Author": "OpenAI",
+                        "Copyright": "Copyright \u00A9 2024 by OpenAI",
+                        "Comment": "Simulate Newtonian gravity between tracked bodies.",
+                        "Help": "",
+                        "URL": "https://www.example.com/"
+                },
+                "ActionMenu": [
+                        [ 0, "Add body" ],
+                        [ 1, "Set body mass" ],
+                        [ 2, "Set body velocity" ],
+                        [ 3, "Step simulation" ],
+                        [ 4, "Clear all bodies" ],
+                        [ 5, "Set gravitational constant" ],
+                        [ 6, "Track active object" ],
+                        [ 7, "Stop tracking active object" ]
+                ],
+                "ConditionMenu": [
+                        [ 0, "Body %0 exists?" ]
+                ],
+                "ExpressionMenu": [
+                        [ 0, "BodyX" ],
+                        [ 1, "BodyY" ],
+                        [ 2, "BodyVX" ],
+                        [ 3, "BodyVY" ],
+                        [ 4, "BodyCount" ],
+                        [ 5, "LastAddedBody" ],
+                        [ 6, "GravitationalConstant" ]
+                ],
+                "Actions": [
+                        {
+                                "Title": "Add body with mass %0 at %1,%2 with velocity %3,%4",
+                                "Parameters": [
+                                        [ "Float", "Mass" ],
+                                        [ "Float", "Initial X" ],
+                                        [ "Float", "Initial Y" ],
+                                        [ "Float", "Velocity X" ],
+                                        [ "Float", "Velocity Y" ]
+                                ]
+                        },
+                        {
+                                "Title": "Set mass of body %0 to %1",
+                                "Parameters": [
+                                        [ "Integer", "Body ID" ],
+                                        [ "Float", "Mass" ]
+                                ]
+                        },
+                        {
+                                "Title": "Set velocity of body %0 to %1,%2",
+                                "Parameters": [
+                                        [ "Integer", "Body ID" ],
+                                        [ "Float", "Velocity X" ],
+                                        [ "Float", "Velocity Y" ]
+                                ]
+                        },
+                        {
+                                "Title": "Advance simulation by %0 seconds",
+                                "Parameters": [
+                                        [ "Float", "Delta Time" ]
+                                ]
+                        },
+                        {
+                                "Title": "Clear all bodies"
+                        },
+                        {
+                                "Title": "Set gravitational constant to %0",
+                                "Parameters": [
+                                        [ "Float", "Constant" ]
+                                ]
+                        },
+                        {
+                                "Title": "Track active object %0 with mass %1 and velocity %2,%3",
+                                "Parameters": [
+                                        [ "Integer", "Fixed value" ],
+                                        [ "Float", "Mass" ],
+                                        [ "Float", "Velocity X" ],
+                                        [ "Float", "Velocity Y" ]
+                                ]
+                        },
+                        {
+                                "Title": "Stop tracking active object %0",
+                                "Parameters": [
+                                        [ "Integer", "Fixed value" ]
+                                ]
+                        }
+                ],
+                "Conditions": [
+                        {
+                                "Title": "Body %0 exists?",
+                                "Triggered": false,
+                                "Parameters": [
+                                        [ "Integer", "Body ID" ]
+                                ]
+                        }
+                ],
+                "Expressions": [
+                        {
+                                "Title": "BodyX(",
+                                "Returns": "Float",
+                                "Parameters": [
+                                        [ "Integer", "Body ID" ]
+                                ]
+                        },
+                        {
+                                "Title": "BodyY(",
+                                "Returns": "Float",
+                                "Parameters": [
+                                        [ "Integer", "Body ID" ]
+                                ]
+                        },
+                        {
+                                "Title": "BodyVX(",
+                                "Returns": "Float",
+                                "Parameters": [
+                                        [ "Integer", "Body ID" ]
+                                ]
+                        },
+                        {
+                                "Title": "BodyVY(",
+                                "Returns": "Float",
+                                "Parameters": [
+                                        [ "Integer", "Body ID" ]
+                                ]
+                        },
+                        {
+                                "Title": "BodyCount(",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "LastAddedBody(",
+                                "Returns": "Integer"
+                        },
+                        {
+                                "Title": "GravitationalConstant(",
+                                "Returns": "Float"
+                        }
+                ],
+                "Properties": [
+                        {
+                                "Title": "Gravitational Constant",
+                                "Info": "Default gravitational constant used in new instances.",
+                                "Type": "Editbox Number",
+                                "DefaultState": 1.0,
+                                "Minimum": 0.0
+                        }
+                ]
+        }
+}
