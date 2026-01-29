@@ -1,0 +1,34 @@
+{
+    "Identifier": "DKTP",
+    "UK English": {
+        "About": {
+            "Name": "DuktapeJS",
+            "Author": "Codex",
+            "Copyright": "Copyright \u00A9 2024 by Codex",
+            "Comment": "Embedded Duktape Javascript for Fusion",
+            "URL": "https://example.com"
+        },
+        "ActionMenu": [
+            [0, "Run JS Script"],
+            [1, "Set Context"]
+        ],
+        "ConditionMenu": [
+            [0, "Dummy condition"]
+        ],
+        "ExpressionMenu": [
+            [0, "Eval$"],
+            [1, "New Context"]
+        ],
+        "Actions": [
+            { "Title": "Run(%0)", "Parameters": [["Text", "Code"]] },
+            { "Title": "SetContext(%0)", "Parameters": [["Integer", "Context ID"]] }
+        ],
+        "Conditions": [
+            { "Title": "DummyCondition", "Triggered": false }
+        ],
+        "Expressions": [
+            { "Title": "Eval$(", "Returns": "Text", "Parameters": [["Text", "Expression"]] },
+            { "Title": "NewContext(", "Returns": "Integer" }
+        ]
+    }
+}
